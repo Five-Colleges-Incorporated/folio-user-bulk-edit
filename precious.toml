@@ -1,0 +1,20 @@
+[commands."common.EOF"]
+type = "tidy"
+include = ["*"]
+cmd = ["end-of-file-fixer"]
+ok_exit_codes = [0, 1]
+[commands."common.whitespace"]
+type = "tidy"
+include = ["*"]
+cmd = ["trailing-whitespace-fixer", "--markdown-linebreak-ext=md"]
+ok_exit_codes = [0, 1]
+[commands."common.large-files"]
+type = "lint"
+include = ["*"]
+cmd = ["check-added-large-files"]
+ok_exit_codes = [0]
+[commands."common.case"]
+type = "lint"
+include = ["*"]
+cmd = ["check-case-conflict"]
+ok_exit_codes = [0]
