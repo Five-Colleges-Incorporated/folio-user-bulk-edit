@@ -1,0 +1,19 @@
+[project]
+name = "folio-user-import-manager"
+version = "0.1.0"
+description = "Initiates, monitors, and reports on mod-user-import operations in FOLIO."
+authors = [
+    {name = "Katherine Bargar", email = "kbargar@fivecolleges.edu"},
+]
+dependencies = []
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
