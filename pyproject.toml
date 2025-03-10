@@ -17,3 +17,25 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+[dependency-groups]
+lint = [
+    "ruff>=0.9.10",
+]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cases>=3.8.6",
+]
+
+[tool.ruff]
+target-version = "py313"
+[tool.ruff.lint]
+select = ["ALL"]
+fixable = ["ALL"]
+ignore = ["ANN401", "D105", "FIX002", "PLR2004", "TD002", "TD003", "COM812"]
+pydocstyle.convention = "google"
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["D", "INP001", "N813", "S101"]
+
+[tool.pyright]
+typeCheckingMode = "basic"

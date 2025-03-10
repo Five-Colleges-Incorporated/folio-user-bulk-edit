@@ -18,3 +18,16 @@ type = "lint"
 include = ["*"]
 cmd = ["check-case-conflict"]
 ok_exit_codes = [0]
+
+[commands."ruff.lint"]
+type = "both"
+include = ["*.py"]
+cmd = ["ruff", "check", "--quiet"]
+tidy_flags = ["--fix-only"]
+ok_exit_codes = [0]
+[commands."ruff.format"]
+type = "both"
+include = ["*.py"]
+cmd = ["ruff", "format", "--quiet"]
+lint_flags = ["--diff"]
+ok_exit_codes = [0]
