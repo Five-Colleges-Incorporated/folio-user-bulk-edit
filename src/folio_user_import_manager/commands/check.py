@@ -33,7 +33,7 @@ def run(options: CheckOptions) -> CheckResults:
     folio = http.client.HTTPSConnection(options.folio_url)
     folio.request(
         "POST",
-        "authn/login-with-expiry",
+        "/authn/login-with-expiry",
         json.dumps(
             {
                 "username": options.folio_username,
@@ -47,7 +47,7 @@ def run(options: CheckOptions) -> CheckResults:
     )
 
     res = folio.getresponse()
-    if res.status != 201 and "folioAccessToken" in res.getheader("set-cookie", ""):
+    if res.status == 201 and "folioAccessToken" in res.getheader("set-cookie", ""):
         return CheckResults()
 
     body = res.read().decode()
