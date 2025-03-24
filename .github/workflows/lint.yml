@@ -23,6 +23,6 @@ jobs:
           cache: enable
 
       # lint
-      - run: precious lint --all
-      - run: precious tidy --all
+      - run: pdm run precious lint --all
+      - run: pdm run precious tidy --all
         if: success() || failure()
