@@ -13,10 +13,10 @@ jobs:
 
       # install dependencies
       - uses: pdm-project/setup-pdm@v4
-      - run: pdm install -G lint
         with:
           cache: true
           cache-dependency-path: ./pdm.lock
+      - run: pdm install -G lint
       - uses: jaxxstorm/action-install-gh-release@v1.10.0
         with:
           repo: houseabsolute/precious
