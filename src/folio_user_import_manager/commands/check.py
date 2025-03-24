@@ -52,7 +52,7 @@ def run(options: CheckOptions) -> CheckResults:
 
     body = res.read().decode()
     try:
-        reason = json.loads(body)["errors"][0].code
+        reason = json.loads(body)["errors"][0]["code"]
     except (ValueError, KeyError):
         reason = body
 
