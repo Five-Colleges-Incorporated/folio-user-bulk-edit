@@ -4,6 +4,12 @@ name: Lint
 
 on:
   workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - review_requested
+      - ready_for_review
+      - auto_merge_enabled
 
 jobs:
   lint:
