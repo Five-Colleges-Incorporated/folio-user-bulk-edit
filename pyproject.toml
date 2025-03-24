@@ -32,6 +32,10 @@ addopts = [
     "--import-mode=importlib",
 ]
 
+[tool.mypy]
+python_version = "3.13"
+strict = true
+
 [tool.ruff]
 target-version = "py313"
 [tool.ruff.lint]
