@@ -24,5 +24,8 @@ jobs:
 
       # lint
       - run: pdm run precious lint --all
-      - run: pdm run precious tidy --all
+      - run: |
+          set -eoux pipefail
+          pdm run precious tidy --all
+          git diff --exit-code
         if: success() || failure()
