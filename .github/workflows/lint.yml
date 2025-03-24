@@ -1,0 +1,28 @@
+# yaml-language-server: $schema: https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/github-workflow.json
+---
+name: Lint
+
+on:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # install dependencies
+      - uses: pdm-project/setup-pdm@v4
+      - run: pdm install -G lint
+        with:
+          cache: true
+          cache-dependency-path: ./pdm.lock
+      - uses: jaxxstorm/action-install-gh-release@v1.10.0
+        with:
+          repo: houseabsolute/precious
+          cache: enable
+
+      # lint
+      - run: precious lint --all
+      - run: precious tidy --all
+        if: success() || failure()
