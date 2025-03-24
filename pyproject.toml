@@ -15,20 +15,15 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 
-[tool.pdm]
-distribution = true
-
 [dependency-groups]
 lint = [
     "ruff>=0.9.10",
+    "pre-commit-hooks>=5.0.0",
 ]
 test = [
     "pytest>=8.3.5",
     "pytest-cases>=3.8.6",
 ]
-
-[tool.pdm.scripts]
-test = "python -m pytest -vv"
 
 [tool.pytest.ini_options]
 pythonpath = "src"
@@ -48,3 +43,9 @@ pydocstyle.convention = "google"
 
 [tool.pyright]
 typeCheckingMode = "basic"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts]
+test = "python -m pytest -vv"
