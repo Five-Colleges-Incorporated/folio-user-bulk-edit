@@ -28,9 +28,5 @@ jobs:
           set -eoux pipefail
 
           pdm run precious tidy --all
-          git diff
-
           git diff --exit-code
-          status=$?
-          if [ $status -ne 0 ]; then exit 1; fi
         if: success() || failure()
