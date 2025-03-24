@@ -1,0 +1,21 @@
+# yaml-language-server: $schema: https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/github-workflow.json
+---
+name: Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # install dependencies
+      - uses: pdm-project/setup-pdm@v4
+        with:
+          cache: true
+      - run: pdm install -G test
+
+      # test
+      - run: pdm run test

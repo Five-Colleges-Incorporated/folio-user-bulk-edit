@@ -15,11 +15,11 @@ jobs:
       - uses: pdm-project/setup-pdm@v4
         with:
           cache: true
-          cache-dependency-path: ./pdm.lock
       - run: pdm install -G lint
       - uses: jaxxstorm/action-install-gh-release@v1.10.0
         with:
           repo: houseabsolute/precious
+          tag: v0.8.0
           cache: enable
 
       # lint
