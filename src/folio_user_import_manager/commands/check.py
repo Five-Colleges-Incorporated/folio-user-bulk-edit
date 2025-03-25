@@ -4,8 +4,10 @@ import http.client
 import json
 import socket
 from dataclasses import dataclass
+from pathlib import Path
 
 import pandera.polars as pla
+import polars as pl
 
 
 @dataclass
@@ -16,6 +18,8 @@ class CheckOptions:
     folio_tenant: str
     folio_username: str
     folio_password: str
+
+    data_location: Path | dict[str, Path]
 
 
 @dataclass
@@ -31,15 +35,23 @@ class CheckResults:
     folio_error: str | None = None
 
     @property
-    def data_ok(self) -> bool:
+    def schema_ok(self) -> bool:
         """Is the data valid?"""
-        return self.data_errors is None
+        return self.schema_errors is None
 
-    """The errors (if there are any) with the data."""
-    data_errors: pla.errors.SchemaErrors | None = None
+    """The errors (if there are any) with the validity of the data."""
+    schema_errors: dict[str, pla.errors.SchemaErrors] | None = None
+
+    @property
+    def read_ok(self) -> bool:
+        """Can we read the data as a csv?"""
+        return self.read_errors is None
+
+    """The errors (if there are any) encountered reading the data."""
+    read_errors: dict[str, pl.exceptions.PolarsError] | None = None
 
 
-def run(options: CheckOptions) -> CheckResults:
+def run(options: CheckOptions) -> CheckResults:  # noqa: C901 (to be broken out after testing)
     """Checks for connectivity and data validity."""
     folio_error = None
     while True:
@@ -79,8 +91,59 @@ def run(options: CheckOptions) -> CheckResults:
 
         break
 
-    data_errors = None
+    schema_errors: dict[str, pla.errors.SchemaErrors] = {}
+    read_errors: dict[str, pl.exceptions.PolarsError] = {}
     while True:
+        user_data_import_schema = pla.DataFrameSchema(
+            {
+                "username": pla.Column(
+                    str,
+                    description="A unique name belonging to a user. "
+                    "Typically used for login",
+                    unique=True,
+                ),
+                "externalSystemId": pla.Column(
+                    str,
+                    description="A unique ID that corresponds to an external authority",
+                    unique=True,
+                ),
+            },
+            strict=True,
+        )
+
+        for n, p in (
+            {"data": options.data_location}
+            if isinstance(options.data_location, Path)
+            else options.data_location
+        ).items():
+            try:
+                pl.read_csv(p)
+            except pl.exceptions.PolarsError as e:
+                read_errors[n] = e
+
+            data: pl.DataFrame | None
+            try:
+                data = pl.read_csv(p, ignore_errors=True)
+            except pl.exceptions.PolarsError as e:
+                if n not in read_errors:
+                    read_errors[n] = e
+                continue
+
+            try:
+                user_data_import_schema.validate(data)
+            except pla.errors.SchemaError as se:
+                schema_errors[n] = pla.errors.SchemaErrors(
+                    user_data_import_schema,
+                    [se],
+                    data,
+                )
+            except pla.errors.SchemaErrors as se:
+                schema_errors[n] = se
+
         break
 
-    return CheckResults(folio_error, data_errors)
+    return CheckResults(
+        folio_error,
+        schema_errors if len(schema_errors) > 0 else None,
+        read_errors if len(read_errors) > 0 else None,
+    )

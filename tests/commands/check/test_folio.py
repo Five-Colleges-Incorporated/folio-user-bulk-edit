@@ -88,6 +88,7 @@ def test_check_folio_ok(folio_url: str) -> None:
             folio_tenant="diku",
             folio_username="diku_admin",
             folio_password="admin",  # noqa:S106
+            data_location={},
         ),
     )
     assert res.folio_ok, res.folio_error
@@ -112,6 +113,7 @@ def test_check_folio_error(
             folio_tenant=folio_tenant,
             folio_username=folio_username,
             folio_password=folio_password,
+            data_location={},
         ),
     )
     assert not res.folio_ok
