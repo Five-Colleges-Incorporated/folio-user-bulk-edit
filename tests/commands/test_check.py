@@ -8,23 +8,23 @@ _password = "admin"  # noqa:S105
 
 
 class FolioOkCases:
-    def case_okapi(  # noqa:ANN201
+    def case_okapi(
         self,
-    ):
+    ) -> str:
         return _okapi
 
-    def case_eureka(  # noqa:ANN201
+    def case_eureka(
         self,
-    ):
+    ) -> str:
         return _eureka
 
 
 class FolioErrorCases:
     @parametrize(env=(_okapi, _eureka))
-    def case_tenant(  # noqa:ANN201
+    def case_tenant(
         self,
         env: str,
-    ):
+    ) -> tuple[str, ...]:
         return (
             env,
             "bad-tenant",
@@ -34,10 +34,10 @@ class FolioErrorCases:
         )
 
     @parametrize(env=(_okapi, _eureka))
-    def case_username(  # noqa:ANN201
+    def case_username(
         self,
         env: str,
-    ):
+    ) -> tuple[str, ...]:
         return (
             env,
             _tenant,
@@ -47,10 +47,10 @@ class FolioErrorCases:
         )
 
     @parametrize(env=(_okapi, _eureka))
-    def case_password(  # noqa:ANN201
+    def case_password(
         self,
         env: str,
-    ):
+    ) -> tuple[str, ...]:
         return (
             env,
             _tenant,
