@@ -20,6 +20,24 @@ class FolioOkCases:
 
 
 class FolioErrorCases:
+    def case_url(
+        self,
+    ) -> tuple[str, ...]:
+        return ("bad.url", _tenant, _username, _password, "Invalid FOLIO Url")
+
+    @parametrize(env=(_okapi, _eureka))
+    def case_services_url(
+        self,
+        env: str,
+    ) -> tuple[str, ...]:
+        return (
+            env.replace("-okapi", "").replace("-kong", "-diku"),
+            _tenant,
+            _username,
+            _password,
+            "Invalid FOLIO Services Url",
+        )
+
     @parametrize(env=(_okapi, _eureka))
     def case_tenant(
         self,

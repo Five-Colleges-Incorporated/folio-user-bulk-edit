@@ -2,6 +2,7 @@
 
 import http.client
 import json
+import socket
 from dataclasses import dataclass
 
 
@@ -31,24 +32,30 @@ class CheckResults:
 def run(options: CheckOptions) -> CheckResults:
     """Checks for connectivity."""
     folio = http.client.HTTPSConnection(options.folio_url)
-    folio.request(
-        "POST",
-        "/authn/login-with-expiry",
-        json.dumps(
+    try:
+        folio.request(
+            "POST",
+            "/authn/login-with-expiry",
+            json.dumps(
+                {
+                    "username": options.folio_username,
+                    "password": options.folio_password,
+                },
+            ),
             {
-                "username": options.folio_username,
-                "password": options.folio_password,
+                "x-okapi-tenant": options.folio_tenant,
+                "content-type": "application/json",
             },
-        ),
-        {
-            "x-okapi-tenant": options.folio_tenant,
-            "content-type": "application/json",
-        },
-    )
+        )
+    except socket.gaierror:
+        return CheckResults("Invalid FOLIO Url")
 
     res = folio.getresponse()
     if res.status == 201 and "folioAccessToken" in res.getheader("set-cookie", ""):
         return CheckResults()
+
+    if res.status == 405:
+        return CheckResults("Invalid FOLIO Services Url")
 
     body = res.read().decode()
     try:
