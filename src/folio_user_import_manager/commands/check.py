@@ -130,7 +130,7 @@ def run(options: CheckOptions) -> CheckResults:  # noqa: C901 (to be broken out 
                 continue
 
             try:
-                user_data_import_schema.validate(data)
+                user_data_import_schema.validate(data, lazy=True)
             except pla.errors.SchemaError as se:
                 schema_errors[n] = pla.errors.SchemaErrors(
                     user_data_import_schema,

@@ -6,6 +6,7 @@ ok_exit_codes = [0, 1]
 [commands."common.whitespace"]
 type = "tidy"
 include = ["*"]
+exclude = ["test/**/samples/*.csv"]
 cmd = ["trailing-whitespace-fixer", "--markdown-linebreak-ext=md"]
 ok_exit_codes = [0, 1]
 [commands."common.large-files"]
