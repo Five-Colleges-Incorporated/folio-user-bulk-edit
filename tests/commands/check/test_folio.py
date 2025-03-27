@@ -7,18 +7,6 @@ _username = "diku_admin"
 _password = "admin"  # noqa:S105
 
 
-class FolioOkCases:
-    def case_okapi(
-        self,
-    ) -> str:
-        return _okapi
-
-    def case_eureka(
-        self,
-    ) -> str:
-        return _eureka
-
-
 class FolioErrorCases:
     def case_url(
         self,
@@ -78,7 +66,7 @@ class FolioErrorCases:
         )
 
 
-@parametrize_with_cases("folio_url", cases=FolioOkCases)
+@parametrize(folio_url=(_okapi, _eureka))
 def test_check_folio_ok(folio_url: str) -> None:
     import folio_user_import_manager.commands.check as uut
 
