@@ -5,7 +5,7 @@
 groups = ["default", "lint", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:feb8a119fb81d65ee8d108eb49c9b7c374c594b854c62499346e8f0770db820a"
+content_hash = "sha256:676e66e66964ad58c8252c5b83eed42e470cad61ced6329e74bbc5732d54b353"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -279,6 +279,22 @@ dependencies = [
     "typeguard",
     "typing-extensions>=3.7.4.3; python_version < \"3.8\"",
     "typing-inspect>=0.6.0",
+]
+files = [
+    {file = "pandera-0.23.1-py3-none-any.whl", hash = "sha256:37f75cfb5e34db88afc07adf3ea07ba8738bca709f0e67799c8f1b2fc6b9c977"},
+    {file = "pandera-0.23.1.tar.gz", hash = "sha256:2afed504ad61bbd2960dc7f85dd6be0b28d230a626f392b8ba05c291b970ae06"},
+]
+
+[[package]]
+name = "pandera"
+version = "0.23.1"
+extras = ["polars"]
+requires_python = ">=3.9"
+summary = "A light-weight and flexible data validation and testing tool for statistical data objects."
+groups = ["default"]
+dependencies = [
+    "pandera==0.23.1",
+    "polars>=0.20.0",
 ]
 files = [
     {file = "pandera-0.23.1-py3-none-any.whl", hash = "sha256:37f75cfb5e34db88afc07adf3ea07ba8738bca709f0e67799c8f1b2fc6b9c977"},
