@@ -1,5 +1,6 @@
 [project]
 name = "folio-user-import-manager"
+# Make sure to also update the cli
 version = "0.1.0"
 description = "Initiates, monitors, and reports on mod-user-import operations in FOLIO."
 authors = [
