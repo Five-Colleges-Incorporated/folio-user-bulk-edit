@@ -50,30 +50,45 @@ def main() -> int:
     parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
     parser.add_argument(
         "command",
-        choices=["check"],
+        metavar="command",
+        choices=["check", "import"],
+        help="What action to perform. One of [%(choices)s]",
         type=str,
     )
     parser.add_argument(
         "-e",
         "--folio-endpoint",
+        help="Service url of the folio instance. "
+        f"Can also be specified as {_FUIMAN__FOLIO__ENDPOINT} environment variable.",
         type=urlparse,
     )
     parser.add_argument(
         "-t",
         "--folio-tenant",
+        help="Tenant of the folio instance. "
+        f"Can also be specified as {_FUIMAN__FOLIO__TENANT} environment variable.",
         type=str,
     )
     parser.add_argument(
         "-u",
         "--folio-username",
+        help="Username of the folio instance service user. "
+        f"Can also be specified as {_FUIMAN__FOLIO__USERNAME} environment variable.",
         type=str,
     )
-    parser.add_argument("-p", "--ask-folio-password", action="store_true")
+    parser.add_argument(
+        "-p",
+        "--ask-folio-password",
+        action="store_true",
+        help="Whether to ask for the password of the folio instance service user. "
+        f"Can also be specified as {_FUIMAN__FOLIO__PASSWORD} environment variable.",
+    )
     parser.add_argument(
         "data",
         action="extend",
         nargs="+",
         type=Path,
+        help="One or more csv files or directories containing csv files to operate on.",
     )
 
     args = _ParsedArgs(
@@ -99,7 +114,7 @@ def main() -> int:
             args.data_location,
         ]
     ):
-        parser.print_usage()
+        parser.print_help()
         return 1
 
     return 0
