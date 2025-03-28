@@ -48,7 +48,7 @@ pydocstyle.convention = "google"
 "**/tests/*" = ["D", "INP001", "N813", "S101"]
 
 [tool.pyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "strict"
 
 [tool.pdm]
 distribution = true

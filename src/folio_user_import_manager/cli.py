@@ -8,6 +8,8 @@ from getpass import getpass
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
+from folio_user_import_manager.commands import check
+
 
 @dataclass
 class _ParsedArgs:
@@ -116,6 +118,10 @@ def main() -> int:
     ):
         parser.print_help()
         return 1
+
+    if args.command == "check":
+        # TODO: Figure out how to make this protocol actual work
+        check.run(args)  # type: ignore [arg-type]
 
     return 0
 
