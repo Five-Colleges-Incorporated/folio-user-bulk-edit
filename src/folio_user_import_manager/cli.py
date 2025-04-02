@@ -1,11 +1,11 @@
 """The Command Line Interface for fuiman."""
 
 import argparse
+import getpass
 import os
 import sys
 from dataclasses import dataclass
 from functools import lru_cache, partial
-from getpass import getpass
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
@@ -127,7 +127,7 @@ def main(args: list[str] | None = None) -> int:
     parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
 
     if parsed_args.ask_folio_password:
-        parsed_args.folio_password = getpass("FOLIO Password:")
+        parsed_args.folio_password = getpass.getpass("FOLIO Password:")
 
     if parsed_args.command == "check":
         try:
