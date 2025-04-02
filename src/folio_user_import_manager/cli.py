@@ -39,9 +39,6 @@ class _ParsedArgs:
         if self.data is None or len(self.data) == 0:
             return None
 
-        if len(self.data) == 1 and self.data[0].is_file():
-            return self.data[0]
-
         locations: dict[str, Path] = {}
         for p in self.data:
             if p.is_file():

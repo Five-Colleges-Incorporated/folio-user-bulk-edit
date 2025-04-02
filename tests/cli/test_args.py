@@ -31,6 +31,9 @@ class CliArgCase:
             yield
 
 
+_decoy_csv = {"decoy": Path("decoy.csv")}
+
+
 class CliArgCases:
     def case_args_ok(self) -> CliArgCase:
         return CliArgCase(
@@ -38,7 +41,7 @@ class CliArgCases:
             {},
             "pass",
             0,
-            CheckOptions("folio.org", "tenant", "user", "pass", Path("decoy.csv")),
+            CheckOptions("folio.org", "tenant", "user", "pass", _decoy_csv),
         )
 
     def case_env_ok(self) -> CliArgCase:
@@ -52,7 +55,7 @@ class CliArgCases:
             },
             "",
             0,
-            CheckOptions("folio.org", "tenant", "user", "pass", Path("decoy.csv")),
+            CheckOptions("folio.org", "tenant", "user", "pass", _decoy_csv),
         )
 
     def case_missing_arg(self) -> CliArgCase:
@@ -98,7 +101,7 @@ class CliArgCases:
                 "tenant",
                 "another_user",
                 "pass",
-                Path("decoy.csv"),
+                _decoy_csv,
             ),
         )
 

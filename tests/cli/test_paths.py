@@ -45,7 +45,7 @@ class CliPathCase:
 class CliPathCases:
     def case_one_file(self, tmpdir: str) -> CliPathCase:
         temp = Path(tmpdir)
-        return CliPathCase(temp, [temp / "d0_f0.csv"], temp / "d0_f0.csv")
+        return CliPathCase(temp, [temp / "d0_f0.csv"], {"d0_f0": temp / "d0_f0.csv"})
 
     def case_multiple_files(self, tmpdir: str) -> CliPathCase:
         temp = Path(tmpdir)
