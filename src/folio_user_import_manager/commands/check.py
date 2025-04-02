@@ -5,14 +5,13 @@ import json
 import socket
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 
 import pandera.polars as pla
 import polars as pl
 
 
 @dataclass(frozen=True)
-class CheckOptions(Protocol):
+class CheckOptions:
     """Options used for checking an import's viability."""
 
     folio_url: str

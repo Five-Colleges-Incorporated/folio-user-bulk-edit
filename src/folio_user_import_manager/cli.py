@@ -38,6 +38,25 @@ class _ParsedArgs:
 
         return {p.stem: p for p in self.data}
 
+    def as_check_options(self) -> check.CheckOptions:
+        if (
+            self.folio_url is None
+            or self.folio_tenant is None
+            or self.folio_username is None
+            or self.folio_password is None
+            or self.data_location is None
+        ):
+            none = "One or more required options is missing"
+            raise TypeError(none)
+
+        return check.CheckOptions(
+            self.folio_url,
+            self.folio_tenant,
+            self.folio_username,
+            self.folio_password,
+            self.data_location,
+        )
+
 
 _FUIMAN__FOLIO__ENDPOINT = "FUIMAN__FOLIO__ENDPOINT"
 _FUIMAN__FOLIO__TENANT = "FUIMAN__FOLIO__TENANT"
@@ -106,22 +125,14 @@ def main() -> int:
     if args.ask_folio_password:
         args.folio_password = getpass("FOLIO Password:")
 
-    if any(
-        a is None
-        for a in [
-            args.folio_url,
-            args.folio_tenant,
-            args.folio_username,
-            args.folio_password,
-            args.data_location,
-        ]
-    ):
-        parser.print_help()
-        return 1
-
     if args.command == "check":
-        # TODO: Figure out how to make this protocol actual work
-        check.run(args)  # type: ignore [arg-type]
+        try:
+            opts = args.as_check_options()
+        except TypeError:
+            parser.print_help()
+            return 1
+
+        check.run(opts)
 
     return 0
 
