@@ -11,7 +11,7 @@ from pytest_cases import parametrize_with_cases
 class CliPathCase:
     _temp: Path
     input_paths: list[Path]
-    expected_paths: Path | dict[str, Path]
+    expected_paths: Path | dict[str, Path] | None = None
 
     @contextmanager
     def setup(self) -> typing.Any:
@@ -28,6 +28,8 @@ class CliPathCase:
 
         (self._temp / "d0_d0" / "d0_d0_d1").mkdir()
         (self._temp / "d0_d0" / "d0_d0_d1" / "d0_d0_d1_f0.csv").touch()
+
+        (self._temp / "d0_d1").mkdir()
 
         with mock.patch.dict(
             "os.environ",
@@ -66,6 +68,55 @@ class CliPathCases:
             },
         )
 
+    def case_mixed_ok(self, tmpdir: str) -> CliPathCase:
+        temp = Path(tmpdir)
+        return CliPathCase(
+            temp,
+            [
+                temp / "d0_f0.csv",
+                temp / "d0_d0" / "d0_d0_d0",
+                temp / "d0_d0" / "d0_d0_d1",
+            ],
+            {
+                "d0_f0": temp / "d0_f0.csv",
+                "d0_d0_d0_f0": temp / "d0_d0" / "d0_d0_d0" / "d0_d0_d0_f0.csv",
+                "d0_d0_d0_f1": temp / "d0_d0" / "d0_d0_d0" / "d0_d0_d0_f1.csv",
+                "d0_d0_d1_f0": temp / "d0_d0" / "d0_d0_d1" / "d0_d0_d1_f0.csv",
+            },
+        )
+
+    def case_no_files(self, tmpdir: str) -> CliPathCase:
+        temp = Path(tmpdir)
+        return CliPathCase(
+            temp,
+            [temp / "d0_d1"],
+        )
+
+    def case_bad_file(self, tmpdir: str) -> CliPathCase:
+        temp = Path(tmpdir)
+        return CliPathCase(
+            temp,
+            [temp / "definitely_not_a_file.csv"],
+        )
+
+    def case_bad_directory(self, tmpdir: str) -> CliPathCase:
+        temp = Path(tmpdir)
+        return CliPathCase(
+            temp,
+            [temp / "definitely_not_a_directory"],
+        )
+
+    def case_mixed_not_ok(self, tmpdir: str) -> CliPathCase:
+        temp = Path(tmpdir)
+        return CliPathCase(
+            temp,
+            [
+                temp / "d0_f0.csv",
+                temp / "d0_d0" / "d0_d0_d0",
+                temp / "d0_d0" / "definitely_not_a_directory",
+            ],
+        )
+
 
 @mock.patch("folio_user_import_manager.commands.check.run")
 @parametrize_with_cases("tc", cases=CliPathCases)
@@ -78,5 +129,8 @@ def test_cli_args(
     with tc.setup():
         uut.main(["check"] + [p.as_posix() for p in tc.input_paths])
 
-    check_run_mock.assert_called_once()
-    assert check_run_mock.call_args_list[0][0][0].data_location == tc.expected_paths
+    if tc.expected_paths is None:
+        check_run_mock.assert_not_called()
+    else:
+        check_run_mock.assert_called_once()
+        assert check_run_mock.call_args_list[0][0][0].data_location == tc.expected_paths

@@ -45,9 +45,12 @@ class _ParsedArgs:
                 locations[p.stem] = p
                 continue
 
+            if not p.is_file() and not p.is_dir():
+                return None
+
             locations = locations | {sp.stem: sp for sp in p.glob("**/*.csv")}
 
-        return locations
+        return locations if len(locations) > 0 else None
 
     def as_check_options(self) -> check.CheckOptions:
         if (
