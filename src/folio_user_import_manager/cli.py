@@ -11,10 +11,10 @@ from urllib.parse import ParseResult, urlparse
 
 from folio_user_import_manager.commands import check
 
-FOLIO__ENDPOINT = "FUIMAN__FOLIO__ENDPOINT"
-FOLIO__TENANT = "FUIMAN__FOLIO__TENANT"
-FOLIO__USERNAME = "FUIMAN__FOLIO__USERNAME"
-FOLIO__PASSWORD = "FUIMAN__FOLIO__PASSWORD"  # noqa:S105
+_FOLIO__ENDPOINT = "FUIMAN__FOLIO__ENDPOINT"
+_FOLIO__TENANT = "FUIMAN__FOLIO__TENANT"
+_FOLIO__USERNAME = "FUIMAN__FOLIO__USERNAME"
+_FOLIO__PASSWORD = "FUIMAN__FOLIO__PASSWORD"  # noqa:S105
 
 
 @dataclass
@@ -88,21 +88,21 @@ class _ParsedArgs:
             "-e",
             "--folio-endpoint",
             help="Service url of the folio instance. "
-            f"Can also be specified as {FOLIO__ENDPOINT} environment variable.",
+            f"Can also be specified as {_FOLIO__ENDPOINT} environment variable.",
             type=partial(urlparse, scheme="https"),
         )
         parser.add_argument(
             "-t",
             "--folio-tenant",
             help="Tenant of the folio instance. "
-            f"Can also be specified as {FOLIO__TENANT} environment variable.",
+            f"Can also be specified as {_FOLIO__TENANT} environment variable.",
             type=str,
         )
         parser.add_argument(
             "-u",
             "--folio-username",
             help="Username of the folio instance service user. "
-            f"Can also be specified as {FOLIO__USERNAME} environment variable.",
+            f"Can also be specified as {_FOLIO__USERNAME} environment variable.",
             type=str,
         )
         parser.add_argument(
@@ -110,7 +110,7 @@ class _ParsedArgs:
             "--ask-folio-password",
             action="store_true",
             help="Whether to ask for the password of the folio instance service user. "
-            f"Can also be specified as {FOLIO__PASSWORD} environment variable.",
+            f"Can also be specified as {_FOLIO__PASSWORD} environment variable.",
         )
         parser.add_argument(
             "data",
@@ -125,12 +125,12 @@ class _ParsedArgs:
 def main(args: list[str] | None = None) -> int:
     """Marshalls inputs and executes commands for fuiman."""
     parsed_args = _ParsedArgs(
-        urlparse(os.environ[FOLIO__ENDPOINT], scheme="https://")
-        if FOLIO__ENDPOINT in os.environ
+        urlparse(os.environ[_FOLIO__ENDPOINT], scheme="https://")
+        if _FOLIO__ENDPOINT in os.environ
         else None,
-        os.environ.get(FOLIO__TENANT),
-        os.environ.get(FOLIO__USERNAME),
-        os.environ.get(FOLIO__PASSWORD),
+        os.environ.get(_FOLIO__TENANT),
+        os.environ.get(_FOLIO__USERNAME),
+        os.environ.get(_FOLIO__PASSWORD),
     )
     try:
         parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
