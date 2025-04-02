@@ -117,7 +117,7 @@ class _ParsedArgs:
 def main(args: list[str] | None = None) -> int:
     """Marshalls inputs and executes commands for fuiman."""
     parsed_args = _ParsedArgs(
-        urlparse(os.environ[FOLIO__ENDPOINT])
+        urlparse(os.environ[FOLIO__ENDPOINT], scheme="https://")
         if FOLIO__ENDPOINT in os.environ
         else None,
         os.environ.get(FOLIO__TENANT),
