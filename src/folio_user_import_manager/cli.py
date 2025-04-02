@@ -4,12 +4,17 @@ import argparse
 import os
 import sys
 from dataclasses import dataclass
-from functools import partial
+from functools import lru_cache, partial
 from getpass import getpass
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
 from folio_user_import_manager.commands import check
+
+FOLIO__ENDPOINT = "FUIMAN__FOLIO__ENDPOINT"
+FOLIO__TENANT = "FUIMAN__FOLIO__TENANT"
+FOLIO__USERNAME = "FUIMAN__FOLIO__USERNAME"
+FOLIO__PASSWORD = "FUIMAN__FOLIO__PASSWORD"  # noqa:S105
 
 
 @dataclass
@@ -58,79 +63,76 @@ class _ParsedArgs:
             self.data_location,
         )
 
+    @staticmethod
+    @lru_cache
+    def parser() -> argparse.ArgumentParser:
+        desc = "Initiates, monitors, and reports on mod-user-import operations in FOLIO"
+        parser = argparse.ArgumentParser(prog="fuiman", description=desc)
+        parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+        parser.add_argument(
+            "command",
+            metavar="command",
+            choices=["check", "import"],
+            help="What action to perform. One of [%(choices)s]",
+            type=str,
+        )
+        parser.add_argument(
+            "-e",
+            "--folio-endpoint",
+            help="Service url of the folio instance. "
+            f"Can also be specified as {FOLIO__ENDPOINT} environment variable.",
+            type=partial(urlparse, scheme="https"),
+        )
+        parser.add_argument(
+            "-t",
+            "--folio-tenant",
+            help="Tenant of the folio instance. "
+            f"Can also be specified as {FOLIO__TENANT} environment variable.",
+            type=str,
+        )
+        parser.add_argument(
+            "-u",
+            "--folio-username",
+            help="Username of the folio instance service user. "
+            f"Can also be specified as {FOLIO__USERNAME} environment variable.",
+            type=str,
+        )
+        parser.add_argument(
+            "-p",
+            "--ask-folio-password",
+            action="store_true",
+            help="Whether to ask for the password of the folio instance service user. "
+            f"Can also be specified as {FOLIO__PASSWORD} environment variable.",
+        )
+        parser.add_argument(
+            "data",
+            action="extend",
+            nargs="+",
+            type=Path,
+            help="One or more .csvs or directories with .csvs to operate on.",
+        )
+        return parser
 
-_FUIMAN__FOLIO__ENDPOINT = "FUIMAN__FOLIO__ENDPOINT"
-_FUIMAN__FOLIO__TENANT = "FUIMAN__FOLIO__TENANT"
-_FUIMAN__FOLIO__USERNAME = "FUIMAN__FOLIO__USERNAME"
-_FUIMAN__FOLIO__PASSWORD = "FUIMAN__FOLIO__PASSWORD"  # noqa:S105
 
-
-def main() -> int:
+def main(args: list[str] | None = None) -> int:
     """Marshalls inputs and executes commands for fuiman."""
-    desc = "Initiates, monitors, and reports on mod-user-import operations in FOLIO"
-    parser = argparse.ArgumentParser(prog="fuiman", description=desc)
-    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
-    parser.add_argument(
-        "command",
-        metavar="command",
-        choices=["check", "import"],
-        help="What action to perform. One of [%(choices)s]",
-        type=str,
-    )
-    parser.add_argument(
-        "-e",
-        "--folio-endpoint",
-        help="Service url of the folio instance. "
-        f"Can also be specified as {_FUIMAN__FOLIO__ENDPOINT} environment variable.",
-        type=partial(urlparse, scheme="https"),
-    )
-    parser.add_argument(
-        "-t",
-        "--folio-tenant",
-        help="Tenant of the folio instance. "
-        f"Can also be specified as {_FUIMAN__FOLIO__TENANT} environment variable.",
-        type=str,
-    )
-    parser.add_argument(
-        "-u",
-        "--folio-username",
-        help="Username of the folio instance service user. "
-        f"Can also be specified as {_FUIMAN__FOLIO__USERNAME} environment variable.",
-        type=str,
-    )
-    parser.add_argument(
-        "-p",
-        "--ask-folio-password",
-        action="store_true",
-        help="Whether to ask for the password of the folio instance service user. "
-        f"Can also be specified as {_FUIMAN__FOLIO__PASSWORD} environment variable.",
-    )
-    parser.add_argument(
-        "data",
-        action="extend",
-        nargs="+",
-        type=Path,
-        help="One or more csv files or directories containing csv files to operate on.",
-    )
-
-    args = _ParsedArgs(
-        urlparse(os.environ[_FUIMAN__FOLIO__ENDPOINT])
-        if _FUIMAN__FOLIO__ENDPOINT in os.environ
+    parsed_args = _ParsedArgs(
+        urlparse(os.environ[FOLIO__ENDPOINT])
+        if FOLIO__ENDPOINT in os.environ
         else None,
-        os.environ.get(_FUIMAN__FOLIO__TENANT),
-        os.environ.get(_FUIMAN__FOLIO__USERNAME),
-        os.environ.get(_FUIMAN__FOLIO__PASSWORD),
+        os.environ.get(FOLIO__TENANT),
+        os.environ.get(FOLIO__USERNAME),
+        os.environ.get(FOLIO__PASSWORD),
     )
-    parser.parse_args(namespace=args)
+    parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
 
-    if args.ask_folio_password:
-        args.folio_password = getpass("FOLIO Password:")
+    if parsed_args.ask_folio_password:
+        parsed_args.folio_password = getpass("FOLIO Password:")
 
-    if args.command == "check":
+    if parsed_args.command == "check":
         try:
-            opts = args.as_check_options()
+            opts = parsed_args.as_check_options()
         except TypeError:
-            parser.print_help()
             return 1
 
         check.run(opts)
@@ -139,4 +141,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    if res := main() == 1:
+        _ParsedArgs.parser().print_help()
+
+    sys.exit(res)
