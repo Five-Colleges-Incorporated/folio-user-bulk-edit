@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 from dataclasses import dataclass
+from functools import partial
 from getpass import getpass
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
@@ -81,7 +82,7 @@ def main() -> int:
         "--folio-endpoint",
         help="Service url of the folio instance. "
         f"Can also be specified as {_FUIMAN__FOLIO__ENDPOINT} environment variable.",
-        type=urlparse,
+        type=partial(urlparse, scheme="https"),
     )
     parser.add_argument(
         "-t",
