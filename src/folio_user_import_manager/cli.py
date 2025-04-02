@@ -39,10 +39,18 @@ class _ParsedArgs:
         if self.data is None or len(self.data) == 0:
             return None
 
-        if len(self.data) == 1:
+        if len(self.data) == 1 and self.data[0].is_file():
             return self.data[0]
 
-        return {p.stem: p for p in self.data}
+        locations: dict[str, Path] = {}
+        for p in self.data:
+            if p.is_file():
+                locations[p.stem] = p
+                continue
+
+            locations = locations | {sp.stem: sp for sp in p.glob("**/*.csv")}
+
+        return locations
 
     def as_check_options(self) -> check.CheckOptions:
         if (

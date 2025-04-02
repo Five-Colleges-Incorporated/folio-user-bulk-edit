@@ -26,6 +26,7 @@ class CliArgCase:
                 return_value=self._getpass,
             ),
             mock.patch.dict("os.environ", self.envs, clear=True),
+            mock.patch("pathlib.Path.is_file", return_value=True),
         ):
             yield
 
@@ -33,16 +34,16 @@ class CliArgCase:
 class CliArgCases:
     def case_args_ok(self) -> CliArgCase:
         return CliArgCase(
-            "check -e http://folio.org -t tenant -u user -p ./",
+            "check -e http://folio.org -t tenant -u user -p decoy.csv",
             {},
             "pass",
             0,
-            CheckOptions("folio.org", "tenant", "user", "pass", Path("./")),
+            CheckOptions("folio.org", "tenant", "user", "pass", Path("decoy.csv")),
         )
 
     def case_env_ok(self) -> CliArgCase:
         return CliArgCase(
-            "check ./",
+            "check decoy.csv",
             {
                 "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
                 "FUIMAN__FOLIO__TENANT": "tenant",
@@ -51,7 +52,7 @@ class CliArgCases:
             },
             "",
             0,
-            CheckOptions("folio.org", "tenant", "user", "pass", Path("./")),
+            CheckOptions("folio.org", "tenant", "user", "pass", Path("decoy.csv")),
         )
 
     def case_missing_arg(self) -> CliArgCase:
@@ -83,7 +84,7 @@ class CliArgCases:
 
     def case_env_override(self) -> CliArgCase:
         return CliArgCase(
-            "check -u another_user ./",
+            "check -u another_user decoy.csv",
             {
                 "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
                 "FUIMAN__FOLIO__TENANT": "tenant",
@@ -92,7 +93,13 @@ class CliArgCases:
             },
             "",
             0,
-            CheckOptions("folio.org", "tenant", "another_user", "pass", Path("./")),
+            CheckOptions(
+                "folio.org",
+                "tenant",
+                "another_user",
+                "pass",
+                Path("decoy.csv"),
+            ),
         )
 
 
