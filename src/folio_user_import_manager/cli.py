@@ -124,10 +124,15 @@ def main(args: list[str] | None = None) -> int:
         os.environ.get(FOLIO__USERNAME),
         os.environ.get(FOLIO__PASSWORD),
     )
-    parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
+    try:
+        parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
+    except SystemExit:
+        return 1
 
     if parsed_args.ask_folio_password:
         parsed_args.folio_password = getpass.getpass("FOLIO Password:")
+        if len(parsed_args.folio_password) == 0:
+            return 1
 
     if parsed_args.command == "check":
         try:

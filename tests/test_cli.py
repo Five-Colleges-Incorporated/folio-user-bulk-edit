@@ -16,7 +16,7 @@ class CliArgCase:
     envs: dict[str, str]
     _getpass: str
     expected_result: int
-    expected_options: CheckOptions
+    expected_options: CheckOptions | None
 
     @contextmanager
     def setup(self) -> typing.Any:
@@ -54,6 +54,33 @@ class CliArgCases:
             CheckOptions("folio.org", "tenant", "user", "pass", Path("./")),
         )
 
+    def case_missing_arg(self) -> CliArgCase:
+        return CliArgCase(
+            "check -e http://folio.org -u user -p ./",
+            {},
+            "pass",
+            1,
+            None,
+        )
+
+    def case_bad_arg(self) -> CliArgCase:
+        return CliArgCase(
+            "check -e http://folio.org -t -u user -p ./",
+            {},
+            "pass",
+            1,
+            None,
+        )
+
+    def case_bad_getpass(self) -> CliArgCase:
+        return CliArgCase(
+            "check -e http://folio.org -t tenant -u user -p ./",
+            {},
+            "",
+            1,
+            None,
+        )
+
     def case_env_override(self) -> CliArgCase:
         return CliArgCase(
             "check -u another_user ./",
@@ -81,4 +108,7 @@ def test_cli_args(
         res = uut.main(shlex.split(tc.args))
 
     assert res == tc.expected_result
-    check_run_mock.assert_called_with(tc.expected_options)
+    if tc.expected_options is None:
+        check_run_mock.assert_not_called()
+    else:
+        check_run_mock.assert_called_with(tc.expected_options)
