@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from unittest import mock
 
+import pytest
 from pytest_cases import parametrize_with_cases
 
 
@@ -11,6 +12,7 @@ from pytest_cases import parametrize_with_cases
 class CliPathCase:
     _temp: Path
     input_paths: list[Path]
+    expected_exception: type[Exception] | type[SystemExit] | None = None
     expected_paths: Path | dict[str, Path] | None = None
 
     @contextmanager
@@ -47,14 +49,18 @@ class CliPathCase:
 class CliPathCases:
     def case_one_file(self, tmpdir: str) -> CliPathCase:
         temp = Path(tmpdir)
-        return CliPathCase(temp, [temp / "d0_f0.csv"], {"d0_f0": temp / "d0_f0.csv"})
+        return CliPathCase(
+            temp,
+            [temp / "d0_f0.csv"],
+            expected_paths={"d0_f0": temp / "d0_f0.csv"},
+        )
 
     def case_multiple_files(self, tmpdir: str) -> CliPathCase:
         temp = Path(tmpdir)
         return CliPathCase(
             temp,
             [temp / "d0_f0.csv", temp / "d0_f1.csv"],
-            {"d0_f0": temp / "d0_f0.csv", "d0_f1": temp / "d0_f1.csv"},
+            expected_paths={"d0_f0": temp / "d0_f0.csv", "d0_f1": temp / "d0_f1.csv"},
         )
 
     def case_one_directory(self, tmpdir: str) -> CliPathCase:
@@ -62,7 +68,7 @@ class CliPathCases:
         return CliPathCase(
             temp,
             [temp / "d0_d0" / "d0_d0_d0"],
-            {
+            expected_paths={
                 "d0_d0_d0_f0": temp / "d0_d0" / "d0_d0_d0" / "d0_d0_d0_f0.csv",
                 "d0_d0_d0_f1": temp / "d0_d0" / "d0_d0_d0" / "d0_d0_d0_f1.csv",
             },
@@ -77,7 +83,7 @@ class CliPathCases:
                 temp / "d0_d0" / "d0_d0_d0",
                 temp / "d0_d0" / "d0_d0_d1",
             ],
-            {
+            expected_paths={
                 "d0_f0": temp / "d0_f0.csv",
                 "d0_d0_d0_f0": temp / "d0_d0" / "d0_d0_d0" / "d0_d0_d0_f0.csv",
                 "d0_d0_d0_f1": temp / "d0_d0" / "d0_d0_d0" / "d0_d0_d0_f1.csv",
@@ -87,16 +93,14 @@ class CliPathCases:
 
     def case_no_files(self, tmpdir: str) -> CliPathCase:
         temp = Path(tmpdir)
-        return CliPathCase(
-            temp,
-            [temp / "d0_d1"],
-        )
+        return CliPathCase(temp, [temp / "d0_d1"], expected_exception=ValueError)
 
     def case_bad_file(self, tmpdir: str) -> CliPathCase:
         temp = Path(tmpdir)
         return CliPathCase(
             temp,
             [temp / "definitely_not_a_file.csv"],
+            expected_exception=ValueError,
         )
 
     def case_bad_directory(self, tmpdir: str) -> CliPathCase:
@@ -104,6 +108,7 @@ class CliPathCases:
         return CliPathCase(
             temp,
             [temp / "definitely_not_a_directory"],
+            expected_exception=ValueError,
         )
 
     def case_mixed_not_ok(self, tmpdir: str) -> CliPathCase:
@@ -115,6 +120,7 @@ class CliPathCases:
                 temp / "d0_d0" / "d0_d0_d0",
                 temp / "d0_d0" / "definitely_not_a_directory",
             ],
+            expected_exception=ValueError,
         )
 
 
@@ -127,7 +133,11 @@ def test_cli_args(
     import folio_user_import_manager.cli as uut
 
     with tc.setup():
-        uut.main(["check"] + [p.as_posix() for p in tc.input_paths])
+        if tc.expected_exception is None:
+            uut.main(["check"] + [p.as_posix() for p in tc.input_paths])
+        else:
+            with pytest.raises(tc.expected_exception):
+                uut.main(["check"] + [p.as_posix() for p in tc.input_paths])
 
     if tc.expected_paths is None:
         check_run_mock.assert_not_called()

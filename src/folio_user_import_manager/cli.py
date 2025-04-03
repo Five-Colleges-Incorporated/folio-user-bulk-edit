@@ -3,7 +3,6 @@
 import argparse
 import getpass
 import os
-import sys
 from dataclasses import dataclass
 from functools import lru_cache, partial
 from pathlib import Path
@@ -49,7 +48,8 @@ class _ParsedArgs:
                 continue
 
             if not p.is_file() and not p.is_dir():
-                return None
+                file = f"{p.resolve().absolute()} does not exist or isn't readable"
+                raise ValueError(file)
 
             locations = locations | {sp.stem: sp for sp in p.glob("**/*.csv")}
 
@@ -64,7 +64,7 @@ class _ParsedArgs:
             or self.data_location is None
         ):
             none = "One or more required options is missing"
-            raise TypeError(none)
+            raise ValueError(none)
 
         return check.CheckOptions(
             self.folio_url,
@@ -129,7 +129,7 @@ class _ParsedArgs:
         return parser
 
 
-def main(args: list[str] | None = None) -> int:
+def main(args: list[str] | None = None) -> None:
     """Marshalls inputs and executes commands for fuiman."""
     parsed_args = _ParsedArgs(
         urlparse(os.environ[_FOLIO__ENDPOINT], scheme="https://")
@@ -139,34 +139,29 @@ def main(args: list[str] | None = None) -> int:
         os.environ.get(_FOLIO__USERNAME),
         os.environ.get(_FOLIO__PASSWORD),
     )
-    try:
-        parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
-        _cli_log.initialize(
-            parsed_args.log_directory,
-            30 - (parsed_args.verbose * 10),
-            20 - (min(1, parsed_args.verbose) * 10),
-        )
-    except SystemExit:
-        return 1
+    parser = _ParsedArgs.parser()
+    parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
+    _cli_log.initialize(
+        parsed_args.log_directory,
+        30 - (parsed_args.verbose * 10),
+        20 - (min(1, parsed_args.verbose) * 10),
+    )
 
     if parsed_args.ask_folio_password:
         parsed_args.folio_password = getpass.getpass("FOLIO Password:")
         if len(parsed_args.folio_password) == 0:
-            return 1
+            empty = "FOLIO Password is required"
+            parser.print_usage()
+            raise ValueError(empty)
 
     if parsed_args.command == "check":
         try:
             opts = parsed_args.as_check_options()
-        except TypeError:
-            return 1
-
+        except ValueError:
+            parser.print_usage()
+            raise
         check.run(opts)
-
-    return 0
 
 
 if __name__ == "__main__":
-    if res := main() == 1:
-        _ParsedArgs.parser().print_help()
-
-    sys.exit(res)
+    main()
