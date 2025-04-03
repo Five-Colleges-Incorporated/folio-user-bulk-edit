@@ -1,5 +1,6 @@
 [project]
 name = "folio-user-import-manager"
+# Make sure to also update the cli
 version = "0.1.0"
 description = "Initiates, monitors, and reports on mod-user-import operations in FOLIO."
 authors = [
@@ -9,6 +10,9 @@ dependencies = ["polars<1.23", "pandera[polars]>=0.19"]
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "Apache-2.0"}
+
+[project.scripts]
+fuiman = "folio_user_import_manager.cli:main"
 
 [build-system]
 requires = ["pdm-backend"]
@@ -45,9 +49,6 @@ ignore = ["ANN401", "D105", "FIX002", "PLR2004", "TD002", "TD003", "COM812"]
 pydocstyle.convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "**/tests/*" = ["D", "INP001", "N813", "S101"]
-
-[tool.pyright]
-typeCheckingMode = "basic"
 
 [tool.pdm]
 distribution = true

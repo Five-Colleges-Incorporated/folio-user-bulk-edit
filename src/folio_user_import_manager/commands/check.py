@@ -5,12 +5,13 @@ import json
 import socket
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TextIO
 
 import pandera.polars as pla
 import polars as pl
 
 
-@dataclass
+@dataclass(frozen=True)
 class CheckOptions:
     """Options used for checking an import's viability."""
 
@@ -49,6 +50,27 @@ class CheckResults:
 
     """The errors (if there are any) encountered reading the data."""
     read_errors: dict[str, pl.exceptions.PolarsError] | None = None
+
+    def write_results(self, stream: TextIO) -> None:
+        """Pretty prints the results of the check."""
+        report = []
+        if self.folio_ok:
+            report.append("✅ FOLIO connection is good!")
+        else:
+            report.append(f"❌ FOLIO connection: {self.folio_error}")
+
+        if self.read_ok and self.schema_ok:
+            report.append("✅ Data is good!")
+        else:
+            report.append("❌ Data has issues:")
+            if self.read_errors:
+                for k, v in self.read_errors.items():
+                    report.append(f"\t{k}: {v}")
+            if self.schema_errors:
+                for k, v in self.schema_errors.items():
+                    report.append(f"\t{k}: {v}")
+
+        stream.writelines("\n".join(report) + "\n")
 
 
 def run(options: CheckOptions) -> CheckResults:  # noqa: C901 (to be broken out after testing)
