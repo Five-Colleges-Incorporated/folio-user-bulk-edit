@@ -1,0 +1,4 @@
+username,externalSystemId
+user1,user1@external.com
+user500,user2@external.com,extracolwhat?
+user2,user2@external.com

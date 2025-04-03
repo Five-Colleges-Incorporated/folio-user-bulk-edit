@@ -5,8 +5,8 @@ description = "Initiates, monitors, and reports on mod-user-import operations in
 authors = [
     {name = "Katherine Bargar", email = "kbargar@fivecolleges.edu"},
 ]
-dependencies = []
-requires-python = ">=3.9"
+dependencies = ["polars<1.23", "pandera[polars]>=0.19"]
+requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 
