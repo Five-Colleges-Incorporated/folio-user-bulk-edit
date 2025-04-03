@@ -3,6 +3,7 @@
 import argparse
 import getpass
 import os
+import sys
 from dataclasses import dataclass
 from functools import lru_cache, partial
 from pathlib import Path
@@ -160,7 +161,7 @@ def main(args: list[str] | None = None) -> None:
         except ValueError:
             parser.print_usage()
             raise
-        check.run(opts)
+        check.run(opts).write_results(sys.stdout)
 
 
 if __name__ == "__main__":
