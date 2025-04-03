@@ -9,6 +9,7 @@ from functools import lru_cache, partial
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
+from folio_user_import_manager import _cli_log
 from folio_user_import_manager.commands import check
 
 _FOLIO__ENDPOINT = "FUIMAN__FOLIO__ENDPOINT"
@@ -26,6 +27,8 @@ class _ParsedArgs:
     ask_folio_password: bool = False
     command: str | None = None
     data: list[Path] | None = None
+    verbose: int = 0
+    log_directory: Path = Path("./logs")
 
     @property
     def folio_url(self) -> str | None:
@@ -76,7 +79,11 @@ class _ParsedArgs:
     def parser() -> argparse.ArgumentParser:
         desc = "Initiates, monitors, and reports on mod-user-import operations in FOLIO"
         parser = argparse.ArgumentParser(prog="fuiman", description=desc)
+
         parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+        parser.add_argument("--log-directory", type=Path)
+        parser.add_argument("-v", "--verbose", action="count")
+
         parser.add_argument(
             "command",
             metavar="command",
@@ -134,6 +141,11 @@ def main(args: list[str] | None = None) -> int:
     )
     try:
         parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
+        _cli_log.initialize(
+            parsed_args.log_directory,
+            30 - (parsed_args.verbose * 10),
+            20 - (min(1, parsed_args.verbose) * 10),
+        )
     except SystemExit:
         return 1
 

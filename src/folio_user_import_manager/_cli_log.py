@@ -10,7 +10,11 @@ def initialize(
     verbose_file_level: int = logging.INFO,
 ) -> None:
     log_directory.mkdir(exist_ok=True, parents=True)
+
     now = datetime.now(tz=None).strftime("%y%m%d%H%M%S")  # noqa: DTZ005
+    (log_directory / f"{now}-verbose.log.tsv").write_text(
+        "asctime\tlevelname\tprocess\tthread\ttaskName\tmodule\tfilename\tlineno\tmessage\n",
+    )
     dictConfig(
         {
             "version": 1,
@@ -18,9 +22,9 @@ def initialize(
             "formatters": {
                 "standard": {"format": "[%(levelname)-8s] %(message)s"},
                 "verbose": {
-                    "format": "%(asctime)s\t%(levelname)s\t"
+                    "format": '"%(asctime)s"\t%(levelname)s\t'
                     "%(process)d\t%(thread)d\t%(taskName)s\t"
-                    '%(module)\t%(filename)s\t%(lineno)d\t"%(message)s"',
+                    '%(module)s\t%(filename)s\t%(lineno)d\t"%(message)s"',
                 },
             },
             "handlers": {
@@ -33,14 +37,13 @@ def initialize(
                     "stream": "ext://sys.stdout",
                 },
                 "file": {
-                    "class": "logging.handlers.FileHandler",
-                    "when": "midnight",
+                    "class": "logging.FileHandler",
                     "level": logging.WARNING,
                     "filename": log_directory / f"{now}.log",
                     "formatter": "standard",
                 },
                 "verbose_file": {
-                    "class": "logging.handlers.FileHandler",
+                    "class": "logging.FileHandler",
                     "level": verbose_file_level,
                     "filename": log_directory / f"{now}-verbose.log.tsv",
                     "formatter": "verbose",
@@ -48,7 +51,7 @@ def initialize(
             },
             "loggers": {
                 "": {
-                    "handlers": ["default", "file", "verbose_file"],
+                    "handlers": ["console", "file", "verbose_file"],
                     "level": min(logging.WARNING, console_level, verbose_file_level),
                 },
             },
