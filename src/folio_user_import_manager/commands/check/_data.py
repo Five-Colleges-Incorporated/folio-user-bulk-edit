@@ -5,6 +5,14 @@ import polars as pl
 
 from ._models import CheckOptions
 
+# https://dev.folio.org/guides/uuids/
+_FOLIO_UUID = r""
+r"^[a-fA-F0-9]{8}-"
+r"[a-fA-F0-9]{4}-"
+r"[1-5][a-fA-F0-9]{3}-"
+r"[89abAB][a-fA-F0-9]{3}-"
+r"[a-fA-F0-9]{12}$"
+
 
 def run(
     options: CheckOptions,
@@ -27,8 +35,16 @@ def run(
                 description="A unique ID that corresponds to an external authority",
                 unique=True,
             ),
+            "id": pla.Column(
+                str,
+                description="A globally unique (UUID) identifier for the user",
+                unique=True,
+                required=False,
+                nullable=True,
+                checks=[pla.Check.str_matches(_FOLIO_UUID)],
+            ),
         },
-        strict=True,
+        strict=False,
     )
 
     for n, p in (
