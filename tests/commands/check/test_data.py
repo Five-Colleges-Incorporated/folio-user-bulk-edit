@@ -10,7 +10,7 @@ _samples = list((Path() / "tests" / "commands" / "check" / "samples").glob("*.cs
 @dataclass
 class _SchemaErrors:
     column: str | None = None
-    reason: ple.SchemaErrorReason | None = None
+    reason: str | ple.SchemaErrorReason | None = None
     check_name: str | None = None
 
 
@@ -25,32 +25,12 @@ class DataErrorCases:
 
     @parametrize(csv=[s for s in _samples if "schema" in str(s)])
     def case_bad_schema(self, csv: Path) -> tuple[Path, bool, _SchemaErrors]:
-        expected = {
-            "schema_duplicate_departments": _SchemaErrors(
-                column="departments",
-                check_name="unique",
-            ),
-            "schema_duplicate_id": _SchemaErrors(
-                column="id",
-                reason=ple.SchemaErrorReason.SERIES_CONTAINS_DUPLICATES,
-            ),
-            "schema_malformed_id": _SchemaErrors(
-                column="id",
-                check_name="folio_id",
-            ),
-            "schema_req_column_name": _SchemaErrors(
-                reason=ple.SchemaErrorReason.COLUMN_NOT_IN_DATAFRAME,
-            ),
-            "schema_zero_id": _SchemaErrors(
-                column="id",
-                check_name="folio_id",
-            ),
-            "schema_invalid_email_preferences": _SchemaErrors(
-                column="preferredEmailCommunication",
-                check_name="unique from set",
-            ),
-        }
-        return (csv, True, expected[csv.stem])
+        with csv.open() as file:
+            params = [
+                p if len(p) > 0 else None
+                for p in file.readline().strip("#").strip("\n").split("|")
+            ]
+        return (csv, True, _SchemaErrors(*params))
 
 
 @parametrize_with_cases("path,read_expected,schema_expected", DataErrorCases)
@@ -84,7 +64,7 @@ def test_check_data(
             assert err.schema.name == schema_expected.column
 
         if schema_expected.reason:
-            assert err.reason_code == schema_expected.reason
+            assert err.reason_code.name == schema_expected.reason
 
         if schema_expected.check_name:
             assert err.check.name == schema_expected.check_name

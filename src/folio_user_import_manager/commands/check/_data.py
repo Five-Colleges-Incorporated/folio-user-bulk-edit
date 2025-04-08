@@ -165,13 +165,13 @@ def run(
         else options.data_location
     ).items():
         try:
-            pl.read_csv(p)
+            pl.read_csv(p, comment_prefix="#")
         except pl.exceptions.PolarsError as e:
             read_errors[n] = e
 
         data: pl.DataFrame | None
         try:
-            data = pl.read_csv(p, ignore_errors=True)
+            data = pl.read_csv(p, comment_prefix="#", ignore_errors=True)
         except pl.exceptions.PolarsError as e:
             if n not in read_errors:
                 read_errors[n] = e
