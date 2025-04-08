@@ -1,4 +1,4 @@
 #|COLUMN_NOT_IN_DATAFRAME|
-username,externalId
-user1,user1@external.com
-user2,user2@external.com
+username
+user1
+user2

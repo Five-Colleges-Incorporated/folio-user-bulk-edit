@@ -1,0 +1,4 @@
+#|COLUMN_NOT_IN_SCHEMA|
+username,externalSystemId,proxyFor
+user1,user1@external.com,"what,is,a,proxy"
+user2,user2@external.com

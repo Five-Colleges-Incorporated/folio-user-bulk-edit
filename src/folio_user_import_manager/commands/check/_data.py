@@ -135,28 +135,8 @@ def run(
                     ),
                 ],
             ),
-            "meta": pla.Column(
-                required=False,
-                nullable=False,
-                checks=[pla.Check(lambda _: False, name="Deprecated")],
-            ),
-            "proxyFor": pla.Column(
-                required=False,
-                nullable=False,
-                checks=[pla.Check(lambda _: False, name="Deprecated")],
-            ),
-            "createdDate": pla.Column(
-                required=False,
-                nullable=False,
-                checks=[pla.Check(lambda _: False, name="Deprecated")],
-            ),
-            "updatedDate": pla.Column(
-                required=False,
-                nullable=False,
-                checks=[pla.Check(lambda _: False, name="Deprecated")],
-            ),
         },
-        strict=False,
+        strict=True,
     )
 
     for n, p in (
