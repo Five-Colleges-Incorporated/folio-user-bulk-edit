@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandera.polars as pla
 import polars as pl
+import polars.selectors as cs
 from pandera.engines.polars_engine import DateTime
 
 from ._models import CheckOptions
@@ -18,7 +19,7 @@ _FOLIO_UUID = (
 )
 
 
-def val_limited_is_unique_vector(
+def val_limited_is_unique(
     vals: set[str] | None = None,
 ) -> typing.Callable[[str], bool]:
     def val_filter(col: str) -> bool:
@@ -31,6 +32,49 @@ def val_limited_is_unique_vector(
     return val_filter
 
 
+class RequestPreference:
+    def __init__(self) -> None:
+        self.req_cols = {
+            "requestPreference_holdShelf",
+            "requestPreference_delivery",
+        }
+        self._required = cs.by_name(
+            self.req_cols,
+            require_all=False,
+        )
+        self._preferences = cs.starts_with("requestPreference_")
+
+    def _agg(self, data: pla.PolarsData) -> dict[str, list[bool]]:
+        noerr = "requestPreference_atleastonekey"
+        frame = (
+            data.lazyframe.with_columns(
+                pl.lit(1).alias(noerr),
+            )
+            .group_by(self._preferences - self._required)
+            .agg(self._required.has_nulls().not_())
+        )
+
+        return (
+            frame.select(self._preferences - cs.by_name(noerr))
+            .collect()
+            .to_dict(as_series=False)
+        )
+
+    def required(self, data: pla.PolarsData) -> bool:
+        pref_cols = self._agg(data)
+        if len(pref_cols) == 0:
+            # there are no no requestPreference columns
+            return True
+        return len(self.req_cols - pref_cols.keys()) == 0
+
+    def not_nullable(self, data: pla.PolarsData) -> bool:
+        pref_cols = self._agg(data)
+        if len(pref_cols) == 0:
+            # there are no no requestPreference columns
+            return True
+        return all(all(v) for (k, v) in pref_cols.items() if k in self.req_cols)
+
+
 def run(
     options: CheckOptions,
 ) -> tuple[
@@ -39,6 +83,7 @@ def run(
 ]:
     schema_errors: dict[str, pla.errors.SchemaErrors] = {}
     read_errors: dict[str, pl.exceptions.PolarsError] = {}
+    req_prefs = RequestPreference()
     user_data_import_schema = pla.DataFrameSchema(
         {
             "username": pla.Column(
@@ -102,7 +147,7 @@ def run(
                 nullable=True,
                 checks=[
                     pla.Check(
-                        val_limited_is_unique_vector(),
+                        val_limited_is_unique(),
                         name="unique",
                         element_wise=True,
                     ),
@@ -127,7 +172,7 @@ def run(
                 nullable=True,
                 checks=[
                     pla.Check(
-                        val_limited_is_unique_vector(
+                        val_limited_is_unique(
                             {"Support", "Programs", "Services"},
                         ),
                         element_wise=True,
@@ -135,7 +180,56 @@ def run(
                     ),
                 ],
             ),
+            "requestPreference_id": pla.Column(
+                str,
+                description="Unique request preference ID",
+                unique=True,
+                required=False,
+                nullable=True,
+                checks=[pla.Check.str_matches(_FOLIO_UUID, name="folio_id")],
+            ),
+            "requestPreference_holdShelf": pla.Column(
+                bool,
+                description="Whether 'Hold Shelf' option is available to the user.",
+                required=False,
+                nullable=True,
+            ),
+            "requestPreference_delivery": pla.Column(
+                bool,
+                description="Whether 'Delivery' option is available to the user.",
+                required=False,
+                nullable=True,
+            ),
+            "requestPreference_defaultServicePointId": pla.Column(
+                str,
+                description="UUID of default service point for 'Hold Shelf' option",
+                unique=True,
+                required=False,
+                nullable=True,
+                checks=[pla.Check.str_matches(_FOLIO_UUID, name="folio_id")],
+            ),
+            "requestPreference_defaultDeliveryAddressTypeId": pla.Column(
+                str,
+                description="Name of user's address type",
+                required=False,
+                nullable=True,
+            ),
+            "requestPreference_fulfillment": pla.Column(
+                str,
+                description="Preferred fulfillment type. "
+                "Possible values are 'Delivery', 'Hold Shelf'",
+                required=False,
+                nullable=True,
+                checks=[pla.Check.isin(["Delivery", "Hold Shelf"])],
+            ),
         },
+        checks=[
+            pla.Check(req_prefs.required, name="requestPreference required"),
+            pla.Check(
+                req_prefs.not_nullable,
+                name="requestPreference SERIES_CONTAINS_NULLS",
+            ),
+        ],
         strict=True,
     )
 
