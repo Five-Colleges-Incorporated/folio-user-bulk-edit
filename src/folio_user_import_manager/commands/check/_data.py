@@ -131,7 +131,7 @@ def run(
                             {"Support", "Programs", "Services"},
                         ),
                         element_wise=True,
-                        name="unique from set",
+                        name="unique isin",
                     ),
                 ],
             ),
@@ -145,13 +145,18 @@ def run(
         else options.data_location
     ).items():
         try:
-            pl.read_csv(p, comment_prefix="#")
+            pl.read_csv(p, comment_prefix="#", try_parse_dates=True)
         except pl.exceptions.PolarsError as e:
             read_errors[n] = e
 
         data: pl.DataFrame | None
         try:
-            data = pl.read_csv(p, comment_prefix="#", ignore_errors=True)
+            data = pl.read_csv(
+                p,
+                comment_prefix="#",
+                ignore_errors=True,
+                try_parse_dates=True,
+            )
         except pl.exceptions.PolarsError as e:
             if n not in read_errors:
                 read_errors[n] = e
