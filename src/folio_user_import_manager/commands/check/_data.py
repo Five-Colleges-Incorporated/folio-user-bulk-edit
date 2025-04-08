@@ -8,40 +8,25 @@ from pandera.engines.polars_engine import DateTime
 from ._models import CheckOptions
 
 # https://dev.folio.org/guides/uuids/
-_FOLIO_UUID = r""
-r"^[a-fA-F0-9]{8}-"
-r"[a-fA-F0-9]{4}-"
-r"[1-5][a-fA-F0-9]{3}-"
-r"[89abAB][a-fA-F0-9]{3}-"
-r"[a-fA-F0-9]{12}$"
+_FOLIO_UUID = (
+    r""
+    r"^[a-fA-F0-9]{8}-"
+    r"[a-fA-F0-9]{4}-"
+    r"[1-5][a-fA-F0-9]{3}-"
+    r"[89abAB][a-fA-F0-9]{3}-"
+    r"[a-fA-F0-9]{12}$"
+)
 
 
 def val_limited_is_unique_vector(
-    vals: list[str] | None = None,
-) -> typing.Callable[[pla.PolarsData], pl.LazyFrame]:
-    def val_filter(data: pla.PolarsData) -> pl.LazyFrame:
-        if data.key is None:
-            return data.lazyframe.select(pl.lit(value=False))
-
-        vec = data.lazyframe.select(
-            pl.col(data.key),
-            pl.col(data.key).list.len().alias("n"),
-            pl.col(data.key).list.n_unique().alias("n_unique"),
-            pl.col("n_unique").eq(pl.col("n").alias("ok")),
+    vals: set[str] | None = None,
+) -> typing.Callable[[str], bool]:
+    def val_filter(col: str) -> bool:
+        all_vals = col.split(",")
+        unique_vals = set(all_vals)
+        return len(unique_vals) == len(all_vals) and (
+            vals is None or len(unique_vals - vals) == 0
         )
-        if vals:
-            vec = vec.select(
-                pl.Expr.and_(
-                    pl.col("ok"),
-                    pl.col("n_unique").le(pl.lit(len(vals))),
-                    pl.col(data.key)
-                    .list.set_intersection(pl.lit(vals))
-                    .len()
-                    .eq(pl.col(data.key).len()),
-                ),
-            )
-
-        return vec.select("ok")
 
     return val_filter
 
@@ -73,7 +58,7 @@ def run(
                 unique=True,
                 required=False,
                 nullable=True,
-                checks=[pla.Check.str_matches(_FOLIO_UUID)],
+                checks=[pla.Check.str_matches(_FOLIO_UUID, name="folio_id")],
             ),
             "barcode": pla.Column(
                 str,
@@ -109,13 +94,19 @@ def run(
                 nullable=True,
             ),
             "departments": pla.Column(
-                pl.List(pl.Utf8()),  # type: ignore[arg-type]
+                str,
                 description="List of names of the departments the user belongs to; "
                 "this is different from the departments property of the /users API"
                 "this is a UUID.",  # This seems like incorrect docs
                 required=False,
                 nullable=True,
-                checks=[pla.Check(val_limited_is_unique_vector())],
+                checks=[
+                    pla.Check(
+                        val_limited_is_unique_vector(),
+                        name="unique",
+                        element_wise=True,
+                    ),
+                ],
             ),
             "enrollmentDate": pla.Column(
                 DateTime(time_zone_agnostic=True),  # type: ignore[arg-type]
@@ -130,15 +121,17 @@ def run(
                 nullable=True,
             ),
             "preferredEmailCommunication": pla.Column(
-                pl.List(pl.Utf8()),  # type: ignore[arg-type]
+                str,
                 description="Preferred email communication types",
                 required=False,
                 nullable=True,
                 checks=[
                     pla.Check(
                         val_limited_is_unique_vector(
-                            ["Support", "Programs", "Services"],
+                            {"Support", "Programs", "Services"},
                         ),
+                        element_wise=True,
+                        name="unique from set",
                     ),
                 ],
             ),
