@@ -1,0 +1,3 @@
+username,externalSystemId,customFields
+user1,user1@external.com,"{""This"": ""is a custom field""}"
+user2,user2@external.com,

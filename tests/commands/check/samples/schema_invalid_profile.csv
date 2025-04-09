@@ -1,0 +1,4 @@
+#personal_profilePictureLink||valid_url
+username,externalSystemId,personal_lastName,personal_profilePictureLink
+user1,user1@external.com,last,https://ok.com
+user2,user2@external.com,name,what.is.this

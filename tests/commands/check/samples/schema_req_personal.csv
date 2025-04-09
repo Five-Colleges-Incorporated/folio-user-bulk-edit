@@ -1,0 +1,4 @@
+#||personal_required_columns
+username,externalSystemId,personal_firstName
+user1,user1@external.com,First
+user2,user2@external.com,Name

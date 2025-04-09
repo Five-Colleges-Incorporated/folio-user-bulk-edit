@@ -1,0 +1,4 @@
+#personal_dateOfBirth|WRONG_DATATYPE|
+username,externalSystemId,personal_lastName,personal_dateOfBirth
+user1,user1@external.com,last,2025-05-04
+user2,user2@external.com,name,20225-05-04

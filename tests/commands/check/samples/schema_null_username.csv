@@ -1,0 +1,4 @@
+#username|SERIES_CONTAINS_NULLS|
+username,externalSystemId
+user1,user1@external.com
+,user2@external.com

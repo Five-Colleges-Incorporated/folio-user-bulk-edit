@@ -1,0 +1,4 @@
+#personal_email||str_matches
+username,externalSystemId,personal_lastName,personal_email
+user1,user1@external.com,last,ok@folio.com
+user2,user2@external.com,name,definitely!not!

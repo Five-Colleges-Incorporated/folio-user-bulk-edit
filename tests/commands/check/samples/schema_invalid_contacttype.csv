@@ -1,0 +1,4 @@
+#personal_preferredContactTypeId||isin
+username,externalSystemId,personal_lastName,personal_preferredContactTypeId
+user1,user1@external.com,last,email
+user2,user2@external.com,name,snail main

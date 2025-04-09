@@ -1,0 +1,4 @@
+#enrollmentDate|WRONG_DATATYPE|
+username,externalSystemId,enrollmentDate
+user1,user1@external.com,2025-08-04 04:30:39 PM
+user2,user2@external.com,

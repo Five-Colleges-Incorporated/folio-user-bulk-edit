@@ -1,0 +1,4 @@
+#requestPreference_id||str_matches
+username,externalSystemId,requestPreference_holdShelf,requestPreference_delivery,requestPreference_id
+user1,user1@external.com,true,false,0d0e7518-2ac9-1d7e-aa43-bb080006b29a
+user2,user2@external.com,true,true,00000000-0000-0000-0000-000000000000

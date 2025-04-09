@@ -1,0 +1,4 @@
+#id|SERIES_CONTAINS_DUPLICATES|
+username,externalSystemId,id
+user1,user1@external.com,0d0e7518-2ac9-1d7e-aa43-bb080006b29a
+user2,user2@external.com,0d0e7518-2ac9-1d7e-aa43-bb080006b29a

@@ -1,0 +1,4 @@
+#id||str_matches
+username,externalSystemId,id
+user1,user1@external.com,00000000-0000-0000-0000-000000000000
+user2,user2@external.com,03630ada-b08d-1611-a80d-a82e9ea633d3

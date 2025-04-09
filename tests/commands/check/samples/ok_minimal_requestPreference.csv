@@ -1,0 +1,3 @@
+username,externalSystemId,requestPreference_holdShelf,requestPreference_delivery
+user1,user1@external.com,true,false
+user2,user2@external.com,true,true

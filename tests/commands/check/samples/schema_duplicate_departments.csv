@@ -1,0 +1,4 @@
+#departments||unique_departments
+username,externalSystemId,departments
+user1,user1@external.com,"one dept,two dept"
+user2,user2@external.com,"one dept,one dept"

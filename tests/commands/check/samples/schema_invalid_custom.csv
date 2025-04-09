@@ -1,0 +1,4 @@
+#customFields||valid_json
+username,externalSystemId,customFields
+user1,user1@external.com,"{"This": "is an unescaped custom field"}"
+user2,user2@external.com,This is nonsense

@@ -1,0 +1,4 @@
+#preferredEmailCommunication||valid_preferences
+username,externalSystemId,preferredEmailCommunication
+user1,user1@external.com,"Support,Programs,No Soliciting"
+user2,user2@external.com,

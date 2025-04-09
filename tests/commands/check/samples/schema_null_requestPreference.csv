@@ -1,0 +1,4 @@
+#||request_not_nullable_columns
+username,externalSystemId,requestPreference_holdShelf,requestPreference_delivery
+user1,user1@external.com,true,
+user2,user2@external.com,true,true
