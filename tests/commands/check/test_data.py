@@ -55,6 +55,7 @@ def test_check_data(
     )
     if schema_expected and res.schema_errors:
         assert len(res.schema_errors["data"].schema_errors) == 1
+        print(res.schema_errors["data"])  # noqa: T201
         err = res.schema_errors["data"].schema_errors[0]
 
         if err.data is not None and schema_expected.column is not None:

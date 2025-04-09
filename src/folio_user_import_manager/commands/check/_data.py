@@ -1,5 +1,4 @@
 import typing
-from email.utils import parseaddr
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -39,47 +38,46 @@ def val_limited_is_unique(
     return val_filter
 
 
-class RequestPreference:
-    def __init__(self) -> None:
-        self.req_cols = {
-            "requestPreference_holdShelf",
-            "requestPreference_delivery",
-        }
-        self._required = cs.by_name(
-            self.req_cols,
+class SubSchema:
+    def __init__(self, prefix: str, req_cols: list[str]) -> None:
+        self._prefix = prefix
+        self._req_cols = {f"{prefix}_{col}" for col in req_cols}
+        self._cs_required = cs.by_name(
+            self._req_cols,
             require_all=False,
         )
-        self._preferences = cs.starts_with("requestPreference_")
+        self._cs_prefix = cs.starts_with(self._prefix)
 
-    def _agg(self, data: pla.PolarsData) -> dict[str, list[bool]]:
-        noerr = "requestPreference_atleastonekey"
-        frame = (
+    def checks(self) -> list[pla.Check]:
+        return [
+            pla.Check(self._required, name=f"{self._prefix} required"),
+            pla.Check(self._not_nullable, name=f"{self._prefix} SERIES_CONTAINS_NULLS"),
+        ]
+
+    def _agg(self, data: pla.PolarsData) -> pl.LazyFrame:
+        noerr = f"{self._prefix}_atleastonekey"
+        return (
             data.lazyframe.with_columns(
                 pl.lit(1).alias(noerr),
             )
-            .group_by(self._preferences - self._required)
-            .agg(self._required.has_nulls().not_())
+            .group_by(self._cs_prefix - self._cs_required)
+            .agg(self._cs_required.has_nulls().not_())
+            .select(self._cs_prefix - cs.by_name(noerr))
         )
 
-        return (
-            frame.select(self._preferences - cs.by_name(noerr))
-            .collect()
-            .to_dict(as_series=False)
-        )
-
-    def required(self, data: pla.PolarsData) -> bool:
-        pref_cols = self._agg(data)
+    def _required(self, data: pla.PolarsData) -> bool:
+        pref_cols = set(self._agg(data).collect_schema().names())
         if len(pref_cols) == 0:
             # there are no no requestPreference columns
             return True
-        return len(self.req_cols - pref_cols.keys()) == 0
+        return len(self._req_cols - pref_cols) == 0
 
-    def not_nullable(self, data: pla.PolarsData) -> bool:
-        pref_cols = self._agg(data)
+    def _not_nullable(self, data: pla.PolarsData) -> bool:
+        pref_cols = self._agg(data).collect().to_dict(as_series=False)
         if len(pref_cols) == 0:
             # there are no no requestPreference columns
             return True
-        return all(all(v) for (k, v) in pref_cols.items() if k in self.req_cols)
+        return all(all(v) for (k, v) in pref_cols.items() if k in self._req_cols)
 
 
 def run(
@@ -90,7 +88,8 @@ def run(
 ]:
     schema_errors: dict[str, pla.errors.SchemaErrors] = {}
     read_errors: dict[str, pl.exceptions.PolarsError] = {}
-    req_prefs = RequestPreference()
+    personal = SubSchema("personal", ["lastName"])
+    req_prefs = SubSchema("requestPreference", ["holdShelf", "delivery"])
     user_data_import_schema = pla.DataFrameSchema(
         {
             "username": pla.Column(
@@ -216,13 +215,7 @@ def run(
                 description="The user's email address",
                 required=False,
                 nullable=True,
-                checks=[
-                    pla.Check(
-                        lambda e: parseaddr(e) != ("", ""),
-                        element_wise=True,
-                        name="invalid",
-                    ),
-                ],
+                checks=[pla.Check.str_matches(_EMAIL_ADDRESS, name="invalid")],
             ),
             "personal_phone": pla.Column(
                 str,
@@ -302,13 +295,7 @@ def run(
                 checks=[pla.Check.isin(["Delivery", "Hold Shelf"])],
             ),
         },
-        checks=[
-            pla.Check(req_prefs.required, name="requestPreference required"),
-            pla.Check(
-                req_prefs.not_nullable,
-                name="requestPreference SERIES_CONTAINS_NULLS",
-            ),
-        ],
+        checks=[*personal.checks(), *req_prefs.checks()],
         strict=True,
     )
 
@@ -350,3 +337,7 @@ def run(
         schema_errors if len(schema_errors) > 0 else None,
         read_errors if len(read_errors) > 0 else None,
     )
+
+
+# https://regex101.com/library/6EL6YF
+_EMAIL_ADDRESS = r"((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))"  # noqa: E501
