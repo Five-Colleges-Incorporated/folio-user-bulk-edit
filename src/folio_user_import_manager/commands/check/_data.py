@@ -1,10 +1,12 @@
 import typing
+from email.utils import parseaddr
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pandera.polars as pla
 import polars as pl
 import polars.selectors as cs
-from pandera.engines.polars_engine import DateTime
+from pandera.engines.polars_engine import Date, DateTime
 
 from ._models import CheckOptions
 
@@ -17,6 +19,11 @@ _FOLIO_UUID = (
     r"[89abAB][a-fA-F0-9]{3}-"
     r"[a-fA-F0-9]{12}$"
 )
+
+
+def is_url(maybe: str) -> bool:
+    (scheme, netloc, *_) = urlparse(maybe)
+    return all([scheme, netloc])
 
 
 def val_limited_is_unique(
@@ -179,6 +186,78 @@ def run(
                         name="unique isin",
                     ),
                 ],
+            ),
+            "personal_lastName": pla.Column(
+                str,
+                description="The user's surname",
+                required=False,
+                nullable=True,
+            ),
+            "personal_firstName": pla.Column(
+                str,
+                description="The user's given name",
+                required=False,
+                nullable=True,
+            ),
+            "personal_middleName": pla.Column(
+                str,
+                description="The user's middle name (if any)",
+                required=False,
+                nullable=True,
+            ),
+            "personal_preferredFirstName": pla.Column(
+                str,
+                description="The user's preferred name",
+                required=False,
+                nullable=True,
+            ),
+            "personal_email": pla.Column(
+                str,
+                description="The user's email address",
+                required=False,
+                nullable=True,
+                checks=[
+                    pla.Check(
+                        lambda e: parseaddr(e) != ("", ""),
+                        element_wise=True,
+                        name="invalid",
+                    ),
+                ],
+            ),
+            "personal_phone": pla.Column(
+                str,
+                description="The user's primary phone number",
+                required=False,
+                nullable=True,
+            ),
+            "personal_mobilePhone": pla.Column(
+                str,
+                description="The user's mobile phone number",
+                required=False,
+                nullable=True,
+            ),
+            "personal_dateOfBirth": pla.Column(
+                Date(),  # type: ignore[arg-type]
+                description="The user's birth date",
+                required=False,
+                nullable=True,
+            ),
+            "personal_preferredContactTypeId": pla.Column(
+                str,
+                description="Name of user's preferred contact type. "
+                "One of mail, email, text, phone, mobile. "
+                "This is different from the preferredContactTypeId property "
+                "of the /users API that is a UUID.",
+                required=False,
+                nullable=True,
+                checks=[pla.Check.isin(["mail", "email", "text", "phone", "mobile"])],
+            ),
+            "personal_profilePictureLink": pla.Column(
+                str,
+                description="Link to the profile picture",
+                required=False,
+                nullable=True,
+                checks=[pla.Check(is_url, element_wise=True, name="invalid")],
             ),
             "requestPreference_id": pla.Column(
                 str,
