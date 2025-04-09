@@ -90,6 +90,68 @@ class SubSchema:
         return all(all(v) for (k, v) in pref_cols.items() if k in self._req_cols)
 
 
+def address(desc: str) -> dict[str, pla.Column]:
+    return {
+        f"personal_address_{desc}_id": pla.Column(
+            str,
+            description="A unique id for this address",
+            required=False,
+            nullable=True,
+            checks=[pla.Check.str_matches(_FOLIO_UUID, name="folio_id")],
+        ),
+        f"personal_address_{desc}_countryId": pla.Column(
+            str,
+            description="The country code for this address",
+            required=False,
+            nullable=True,
+        ),
+        f"personal_address_{desc}_addressLine1": pla.Column(
+            str,
+            description="Address, Line 1",
+            required=False,
+            nullable=True,
+        ),
+        f"personal_address_{desc}_addressLine2": pla.Column(
+            str,
+            description="Address, Line 2",
+            required=False,
+            nullable=True,
+        ),
+        f"personal_address_{desc}_city": pla.Column(
+            str,
+            description="City name",
+            required=False,
+            nullable=True,
+        ),
+        f"personal_address_{desc}_region": pla.Column(
+            str,
+            description="Region",
+            required=False,
+            nullable=True,
+        ),
+        f"personal_address_{desc}_postalCode": pla.Column(
+            str,
+            description="Postal Code",
+            required=False,
+            nullable=True,
+        ),
+        f"personal_address_{desc}_addressTypeId": pla.Column(
+            str,
+            description="The name of an address type object at the /addresstypes API; "
+            "this is different from the addressTypeId property of the /users API "
+            "that is a UUID.",
+            required=False,
+            nullable=True,
+        ),
+        f"personal_address_{desc}_primaryAddress": pla.Column(
+            bool,
+            description="The country code for this address",
+            required=False,
+            nullable=True,
+        ),
+    }
+
+
 def run(
     options: CheckOptions,
 ) -> tuple[
@@ -262,6 +324,8 @@ def run(
                 nullable=True,
                 checks=[pla.Check(is_url, element_wise=True, name="invalid")],
             ),
+            **address("primary"),
+            **address("secondary"),
             "requestPreference_id": pla.Column(
                 str,
                 description="Unique request preference ID",
