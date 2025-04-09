@@ -1,4 +1,4 @@
-#||personal SERIES_CONTAINS_NULLS
+#||personal_not_nullable_columns
 username,externalSystemId,personal_lastName
 user1,user1@external.com,Last
 user2,user2@external.com,

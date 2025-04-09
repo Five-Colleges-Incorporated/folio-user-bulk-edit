@@ -1,4 +1,4 @@
-#||requestPreference required
+#||request_required_columns
 username,externalSystemId,requestPreference_defaultDeliveryAddressTypeId
 user1,user1@external.com,
 user2,user2@external.com,what is this?
