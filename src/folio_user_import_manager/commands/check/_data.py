@@ -1,3 +1,4 @@
+import json
 import typing
 from pathlib import Path
 from urllib.parse import urlparse
@@ -23,6 +24,15 @@ _FOLIO_UUID = (
 def is_url(maybe: str) -> bool:
     (scheme, netloc, *_) = urlparse(maybe)
     return all([scheme, netloc])
+
+
+def is_json(maybe: str) -> bool:
+    try:
+        json.loads(maybe)
+    except ValueError:
+        return False
+
+    return True
 
 
 def val_limited_is_unique(
@@ -293,6 +303,13 @@ def run(
                 required=False,
                 nullable=True,
                 checks=[pla.Check.isin(["Delivery", "Hold Shelf"])],
+            ),
+            "customFields": pla.Column(
+                str,
+                description="Object that contains custom field",
+                required=False,
+                nullable=True,
+                checks=[pla.Check(is_json, element_wise=True, name="invalid")],
             ),
         },
         checks=[*personal.checks(), *req_prefs.checks()],
