@@ -1,0 +1,4 @@
+#requestPreference_fulfillment||isin
+username,externalSystemId,requestPreference_holdShelf,requestPreference_delivery,requestPreference_fulfillment
+user1,user1@external.com,true,false,Delivery
+user2,user2@external.com,true,true,Take Out

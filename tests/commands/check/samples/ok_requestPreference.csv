@@ -1,0 +1,3 @@
+username,externalSystemId,requestPreference_holdShelf,requestPreference_delivery,requestPreference_id,requestPreference_defaultServicePointId,requestPreference_fulfillment
+user1,user1@external.com,true,false,b4560d73-7d7a-4b86-a505-03c7f28b6bc8,,Hold Shelf
+user2,user2@external.com,true,true,,b4560d73-7d7a-4b86-a505-03c7f28b6bc8,Delivery
