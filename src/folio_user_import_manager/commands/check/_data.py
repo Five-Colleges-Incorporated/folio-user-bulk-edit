@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import pandera.polars as pla
 import polars as pl
 import polars.selectors as cs
-from pandera.engines.polars_engine import Date, DateTime
+from pandera.engines.polars_engine import Date
 
 from ._models import CheckOptions
 
@@ -170,13 +170,13 @@ def run(
                 ],
             ),
             "enrollmentDate": pla.Column(
-                DateTime(time_zone_agnostic=True),  # type: ignore[arg-type]
+                Date(),  # type: ignore[arg-type]
                 description="The date in which the user joined the organization",
                 required=False,
                 nullable=True,
             ),
             "expirationDate": pla.Column(
-                DateTime(time_zone_agnostic=True),  # type: ignore[arg-type]
+                Date(),  # type: ignore[arg-type]
                 description="The date for when the user becomes inactive",
                 required=False,
                 nullable=True,
@@ -310,6 +310,12 @@ def run(
                 required=False,
                 nullable=True,
                 checks=[pla.Check(is_json, element_wise=True, name="invalid")],
+            ),
+            "tags": pla.Column(
+                str,
+                description="List of simple tags that can be added to an object",
+                required=False,
+                nullable=True,
             ),
         },
         checks=[*personal.checks(), *req_prefs.checks()],
