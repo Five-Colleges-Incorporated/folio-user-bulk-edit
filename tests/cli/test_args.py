@@ -9,6 +9,7 @@ import pytest
 from pytest_cases import parametrize_with_cases
 
 from folio_user_import_manager.commands.check import CheckOptions
+from folio_user_import_manager.commands.user_import import ImportOptions
 
 
 @dataclass
@@ -17,7 +18,7 @@ class CliArgCase:
     envs: dict[str, str]
     _getpass: str
     expected_exception: type[Exception] | type[SystemExit] | None = None
-    expected_options: CheckOptions | None = None
+    expected_options: CheckOptions | ImportOptions | None = None
 
     @contextmanager
     def setup(self) -> typing.Any:
@@ -112,11 +113,43 @@ class CliArgCases:
             ),
         )
 
+    def case_import_overrides(self) -> CliArgCase:
+        return CliArgCase(
+            "--batch-size 2 import --no-update-all-fields decoy.csv",
+            {
+                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
+                "FUIMAN__FOLIO__TENANT": "tenant",
+                "FUIMAN__FOLIO__USERNAME": "user",
+                "FUIMAN__FOLIO__PASSWORD": "pass",
+                "FUIMAN__BATCHSETTINGS__BATCHSIZE": "1",
+                "FUIMAN__BATCHSETTINGS__FAILEDUSERTHRESHOLD": "30",
+                "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS": "1",
+                "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS": "1",
+            },
+            "",
+            expected_options=ImportOptions(
+                "folio.org",
+                "tenant",
+                "user",
+                "pass",
+                2,
+                6,
+                1,
+                0.3,
+                True,  # noqa: FBT003
+                False,  # noqa: FBT003
+                None,
+                _decoy_csv,
+            ),
+        )
 
+
+@mock.patch("folio_user_import_manager.commands.user_import.run")
 @mock.patch("folio_user_import_manager.commands.check.run")
 @parametrize_with_cases("tc", cases=CliArgCases)
 def test_cli_args(
-    check_run_mock: mock.Mock,
+    check_mock: mock.Mock,
+    import_mock: mock.Mock,
     tc: CliArgCase,
 ) -> None:
     import folio_user_import_manager.cli as uut
@@ -129,6 +162,13 @@ def test_cli_args(
                 uut.main(shlex.split(tc.args))
 
     if tc.expected_options is None:
-        check_run_mock.assert_not_called()
+        check_mock.assert_not_called()
+        import_mock.assert_not_called()
+        return
+
+    if isinstance(tc.expected_options, CheckOptions):
+        check_mock.assert_called_with(tc.expected_options)
+    elif isinstance(tc.expected_options, ImportOptions):
+        import_mock.assert_called_with(tc.expected_options)
     else:
-        check_run_mock.assert_called_with(tc.expected_options)
+        pytest.fail(f"Unknown result type {tc.expected_options}")

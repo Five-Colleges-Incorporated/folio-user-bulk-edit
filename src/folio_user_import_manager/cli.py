@@ -29,26 +29,35 @@ _MODUSERIMPORT__SOURCETYPE = "FUIMAN__MODUSERIMPORT__SOURCETYPE"
 
 @dataclass
 class _ParsedArgs:
+    # These have internal defaults, env vars, and cli flags
     batch_size: int
     max_concurrency: int
     retry_count: int
     failed_user_threshold: int
+    default_deactivate_missing_users: bool
+    default_update_all_fields: bool
 
+    # These have env vars and cli flags
     folio_endpoint: ParseResult | None = None
     folio_tenant: str | None = None
     folio_username: str | None = None
     folio_password: str | None = None
     ask_folio_password: bool = False
 
-    command: str | None = None
-
-    deactivate_missing_users: bool = False
-    update_all_fields: bool = False
     source_type: str | None = None
 
+    # the subparser
+    command: str | None = None
+
+    # These boolean flags don't behave like the rest of the fields
+    deactivate_missing_users: bool | None = None
+    update_all_fields: bool | None = None
+
+    # see note below on nargs + subparsers
     additional_data: list[Path] | None = None
     data: Path | None = None
 
+    # these have just defaults and cli flags
     verbose: int = 0
     log_directory: Path = Path("./logs")
 
@@ -120,9 +129,13 @@ class _ParsedArgs:
             self.batch_size,
             self.max_concurrency,
             self.retry_count,
-            self.failed_user_threshold,
-            self.deactivate_missing_users,
-            self.update_all_fields,
+            self.failed_user_threshold / 100,
+            self.default_deactivate_missing_users
+            if self.deactivate_missing_users is None
+            else self.deactivate_missing_users,
+            self.default_update_all_fields
+            if self.update_all_fields is None
+            else self.update_all_fields,
             self.source_type,
             self.data_location,
         )
@@ -222,15 +235,15 @@ class _ParsedArgs:
         )
         import_parser.add_argument(
             "--deactivate-missing-users",
-            action="store_true",
+            action=argparse.BooleanOptionalAction,
             help="Indicates whether to deactivate users "
             "that are missing in current user's data collection. "
             f"Can also be specified as {_MODUSERIMPORT__DEACTIVATEMISSINGUSERS} "
             "environment variable.",
         )
         import_parser.add_argument(
-            "--update-only-present-fields",
-            action="store_true",
+            "--update-all-fields",
+            action=argparse.BooleanOptionalAction,
             help="Indicates whether to update only present fields in user's data. "
             "Currently this only works for addresses. "
             f"Can also be specified as {_MODUSERIMPORT__UPDATEALLFIELDS} "
@@ -270,17 +283,21 @@ def main(args: list[str] | None = None) -> None:
         batch_size=int(os.environ.get(_BATCH__BATCHSIZE, "1000")),
         max_concurrency=int(os.environ.get(_BATCH__MAXCONCURRENCY, "6")),
         retry_count=int(os.environ.get(_BATCH__RETRYCOUNT, "1")),
-        failed_user_threshold=int(os.environ.get(_BATCH__RETRYCOUNT, "0")),
-        deactivate_missing_users=bool(
-            os.environ.get(_MODUSERIMPORT__DEACTIVATEMISSINGUSERS, "0"),
-        ),
-        update_all_fields=bool(
-            os.environ.get(_MODUSERIMPORT__UPDATEALLFIELDS, "0"),
-        ),
+        failed_user_threshold=int(os.environ.get(_BATCH__FAILEDUSERTHRESHOLD, "0")),
+        default_deactivate_missing_users=os.environ.get(
+            _MODUSERIMPORT__DEACTIVATEMISSINGUSERS,
+            "0",
+        )
+        == "1",
+        default_update_all_fields=os.environ.get(
+            _MODUSERIMPORT__UPDATEALLFIELDS,
+            "0",
+        )
+        == "1",
         source_type=os.environ.get(_MODUSERIMPORT__SOURCETYPE),
     )
     parser = _ParsedArgs.parser()
-    parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
+    parsed_args = parser.parse_args(args, namespace=parsed_args)
     _cli_log.initialize(
         parsed_args.log_directory,
         30 - (parsed_args.verbose * 10),
