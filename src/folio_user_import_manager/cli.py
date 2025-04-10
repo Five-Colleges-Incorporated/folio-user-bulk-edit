@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
 from folio_user_import_manager import _cli_log
-from folio_user_import_manager.commands import check
+from folio_user_import_manager.commands import check, user_import
 
 _FOLIO__ENDPOINT = "FUIMAN__FOLIO__ENDPOINT"
 _FOLIO__TENANT = "FUIMAN__FOLIO__TENANT"
@@ -29,16 +29,16 @@ _MODUSERIMPORT__SOURCETYPE = "FUIMAN__MODUSERIMPORT__SOURCETYPE"
 
 @dataclass
 class _ParsedArgs:
+    batch_size: int
+    max_concurrency: int
+    retry_count: int
+    failed_user_threshold: int
+
     folio_endpoint: ParseResult | None = None
     folio_tenant: str | None = None
     folio_username: str | None = None
     folio_password: str | None = None
     ask_folio_password: bool = False
-
-    batch_size: int | None = None
-    max_concurrency: int | None = None
-    retry_count: int | None = None
-    failed_user_threshold: int | None = None
 
     command: str | None = None
 
@@ -98,6 +98,32 @@ class _ParsedArgs:
             self.folio_tenant,
             self.folio_username,
             self.folio_password,
+            self.data_location,
+        )
+
+    def as_import_options(self) -> user_import.ImportOptions:
+        if (
+            self.folio_url is None
+            or self.folio_tenant is None
+            or self.folio_username is None
+            or self.folio_password is None
+            or self.data_location is None
+        ):
+            none = "One or more required options is missing"
+            raise ValueError(none)
+
+        return user_import.ImportOptions(
+            self.folio_url,
+            self.folio_tenant,
+            self.folio_username,
+            self.folio_password,
+            self.batch_size,
+            self.max_concurrency,
+            self.retry_count,
+            self.failed_user_threshold,
+            self.deactivate_missing_users,
+            self.update_all_fields,
+            self.source_type,
             self.data_location,
         )
 
@@ -270,11 +296,18 @@ def main(args: list[str] | None = None) -> None:
 
     if parsed_args.command == "check":
         try:
-            opts = parsed_args.as_check_options()
+            c_opts = parsed_args.as_check_options()
         except ValueError:
             parser.print_usage()
             raise
-        check.run(opts).write_results(sys.stdout)
+        check.run(c_opts).write_results(sys.stdout)
+    elif parsed_args.command == "import":
+        try:
+            i_opts = parsed_args.as_import_options()
+        except ValueError:
+            parser.print_usage()
+            raise
+        user_import.run(i_opts)
 
 
 if __name__ == "__main__":
