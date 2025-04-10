@@ -26,7 +26,8 @@ class _ParsedArgs:
     folio_password: str | None
     ask_folio_password: bool = False
     command: str | None = None
-    data: list[Path] | None = None
+    additional_data: list[Path] | None = None
+    data: Path | None = None
     verbose: int = 0
     log_directory: Path = Path("./logs")
 
@@ -39,11 +40,15 @@ class _ParsedArgs:
 
     @property
     def data_location(self) -> Path | dict[str, Path] | None:
-        if self.data is None or len(self.data) == 0:
+        if self.data is None:
             return None
 
+        all_data = [self.data]
+        if self.additional_data is not None:
+            all_data = all_data + self.additional_data
+
         locations: dict[str, Path] = {}
-        for p in self.data:
+        for p in all_data:
             if p.is_file():
                 locations[p.stem] = p
                 continue
@@ -82,51 +87,77 @@ class _ParsedArgs:
         parser = argparse.ArgumentParser(prog="fuiman", description=desc)
 
         parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
-        parser.add_argument("--log-directory", type=Path)
         parser.add_argument("-v", "--verbose", action="count")
+        parser.add_argument("--log-directory", type=Path)
 
-        parser.add_argument(
-            "command",
-            metavar="command",
-            choices=["check", "import"],
-            help="What action to perform. One of [%(choices)s]",
-            type=str,
-        )
-        parser.add_argument(
+        folio_parser = parser.add_argument_group("FOLIO Settings")
+        folio_parser.add_argument(
             "-e",
             "--folio-endpoint",
             help="Service url of the folio instance. "
             f"Can also be specified as {_FOLIO__ENDPOINT} environment variable.",
             type=partial(urlparse, scheme="https"),
         )
-        parser.add_argument(
+        folio_parser.add_argument(
             "-t",
             "--folio-tenant",
             help="Tenant of the folio instance. "
             f"Can also be specified as {_FOLIO__TENANT} environment variable.",
             type=str,
         )
-        parser.add_argument(
+        folio_parser.add_argument(
             "-u",
             "--folio-username",
             help="Username of the folio instance service user. "
             f"Can also be specified as {_FOLIO__USERNAME} environment variable.",
             type=str,
         )
-        parser.add_argument(
+        folio_parser.add_argument(
             "-p",
             "--ask-folio-password",
             action="store_true",
             help="Whether to ask for the password of the folio instance service user. "
             f"Can also be specified as {_FOLIO__PASSWORD} environment variable.",
         )
+
+        data_desc = "One or more .csvs or directories with .csvs to operate on."
+
+        def data(p: argparse.ArgumentParser) -> None:
+            p.add_argument(
+                "additional_data",
+                action="extend",
+                nargs="*",
+                metavar="data",
+                type=Path,
+                help=data_desc,
+            )
+
+        commands = parser.add_subparsers(dest="command", metavar="command")
+        check_desc = "Quickly checks input files and FOLIO connection for validity."
+        check_parser = commands.add_parser(
+            "check",
+            help=check_desc,
+            description=check_desc,
+        )
+
+        import_desc = "Imports input files to FOlIO and reports on progress and errors."
+        import_parser = commands.add_parser(
+            "import",
+            help=import_desc,
+            description=import_desc,
+        )
+
+        # https://stackoverflow.com/a/74492728
+        # subparsers interact poorly with nargs
+        # we have a somewhat dummy path arg here to display properly in help
+        data(check_parser)
+        data(import_parser)
         parser.add_argument(
             "data",
-            action="extend",
-            nargs="+",
             type=Path,
-            help="One or more .csvs or directories with .csvs to operate on.",
+            help=data_desc,
         )
+
         return parser
 
 

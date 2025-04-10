@@ -91,6 +91,10 @@ class CliPathCases:
             },
         )
 
+    def case_no_arg(self, tmpdir: str) -> CliPathCase:
+        temp = Path(tmpdir)
+        return CliPathCase(temp, [], expected_exception=SystemExit)
+
     def case_no_files(self, tmpdir: str) -> CliPathCase:
         temp = Path(tmpdir)
         return CliPathCase(temp, [temp / "d0_d1"], expected_exception=ValueError)

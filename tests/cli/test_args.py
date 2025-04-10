@@ -38,7 +38,7 @@ _decoy_csv = {"decoy": Path("decoy.csv")}
 class CliArgCases:
     def case_args_ok(self) -> CliArgCase:
         return CliArgCase(
-            "check -e http://folio.org -t tenant -u user -p decoy.csv",
+            "-e http://folio.org -t tenant -u user -p check decoy.csv",
             {},
             "pass",
             expected_options=CheckOptions(
@@ -71,7 +71,7 @@ class CliArgCases:
 
     def case_missing_arg(self) -> CliArgCase:
         return CliArgCase(
-            "check -e http://folio.org -u user -p ./",
+            "-e http://folio.org -u user -p check ./",
             {},
             "pass",
             expected_exception=ValueError,
@@ -79,7 +79,7 @@ class CliArgCases:
 
     def case_bad_arg(self) -> CliArgCase:
         return CliArgCase(
-            "check -e http://folio.org -t -u user -p ./",
+            "-e http://folio.org -t -u user -p check ./",
             {},
             "pass",
             expected_exception=SystemExit,
@@ -87,7 +87,7 @@ class CliArgCases:
 
     def case_bad_getpass(self) -> CliArgCase:
         return CliArgCase(
-            "check -e http://folio.org -t tenant -u user -p ./",
+            "-e http://folio.org -t tenant -u user -p check ./",
             {},
             "",
             expected_exception=ValueError,
@@ -95,7 +95,7 @@ class CliArgCases:
 
     def case_env_override(self) -> CliArgCase:
         return CliArgCase(
-            "check -u another_user decoy.csv",
+            "-u another_user check decoy.csv",
             {
                 "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
                 "FUIMAN__FOLIO__TENANT": "tenant",
