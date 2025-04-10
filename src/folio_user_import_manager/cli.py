@@ -17,17 +17,38 @@ _FOLIO__TENANT = "FUIMAN__FOLIO__TENANT"
 _FOLIO__USERNAME = "FUIMAN__FOLIO__USERNAME"
 _FOLIO__PASSWORD = "FUIMAN__FOLIO__PASSWORD"  # noqa:S105
 
+_BATCH__BATCHSIZE = "FUIMAN__BATCHSETTINGS__BATCHSIZE"
+_BATCH__MAXCONCURRENCY = "FUIMAN__BATCHSETTINGS__MAXCONCURRENCY"
+_BATCH__RETRYCOUNT = "FUIMAN__BATCHSETTINGS__RETRYCOUNT"
+_BATCH__FAILEDUSERTHRESHOLD = "FUIMAN__BATCHSETTINGS__FAILEDUSERTHRESHOLD"
+
+_MODUSERIMPORT__DEACTIVATEMISSINGUSERS = "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS"
+_MODUSERIMPORT__UPDATEALLFIELDS = "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS"
+_MODUSERIMPORT__SOURCETYPE = "FUIMAN__MODUSERIMPORT__SOURCETYPE"
+
 
 @dataclass
 class _ParsedArgs:
-    folio_endpoint: ParseResult | None
-    folio_tenant: str | None
-    folio_username: str | None
-    folio_password: str | None
+    folio_endpoint: ParseResult | None = None
+    folio_tenant: str | None = None
+    folio_username: str | None = None
+    folio_password: str | None = None
     ask_folio_password: bool = False
+
+    batch_size: int | None = None
+    max_concurrency: int | None = None
+    retry_count: int | None = None
+    failed_user_threshold: int | None = None
+
     command: str | None = None
+
+    deactivate_missing_users: bool = False
+    update_all_fields: bool = False
+    source_type: str | None = None
+
     additional_data: list[Path] | None = None
     data: Path | None = None
+
     verbose: int = 0
     log_directory: Path = Path("./logs")
 
@@ -120,6 +141,33 @@ class _ParsedArgs:
             f"Can also be specified as {_FOLIO__PASSWORD} environment variable.",
         )
 
+        folio_parser = parser.add_argument_group("Batch Settings")
+        folio_parser.add_argument(
+            "--batch-size",
+            help="Maximum number of records to send to FOLIO at a time. "
+            f"Can also be specified as {_BATCH__BATCHSIZE} environment variable.",
+            type=int,
+        )
+        folio_parser.add_argument(
+            "--max-concurrency",
+            help="Maximum number of requests to be sending to FOLIO at a time. "
+            f"Can also be specified as {_BATCH__MAXCONCURRENCY} environment variable.",
+            type=int,
+        )
+        folio_parser.add_argument(
+            "--retry-count",
+            help="Maximum number times a failed request can be retried. "
+            f"Can also be specified as {_BATCH__RETRYCOUNT} environment variable.",
+            type=int,
+        )
+        folio_parser.add_argument(
+            "--failed-user-threshold",
+            help="Percentage of users that failed to create/update triggering a retry. "
+            f"Can also be specified as {_BATCH__FAILEDUSERTHRESHOLD} "
+            "environment variable.",
+            type=int,
+        )
+
         data_desc = "One or more .csvs or directories with .csvs to operate on."
 
         def data(p: argparse.ArgumentParser) -> None:
@@ -140,11 +188,34 @@ class _ParsedArgs:
             description=check_desc,
         )
 
-        import_desc = "Imports input files to FOlIO and reports on progress and errors."
+        import_desc = "Imports input files to FOLIO and reports on progress and errors."
         import_parser = commands.add_parser(
             "import",
             help=import_desc,
             description=import_desc,
+        )
+        import_parser.add_argument(
+            "--deactivate-missing-users",
+            action="store_true",
+            help="Indicates whether to deactivate users "
+            "that are missing in current user's data collection. "
+            f"Can also be specified as {_MODUSERIMPORT__DEACTIVATEMISSINGUSERS} "
+            "environment variable.",
+        )
+        import_parser.add_argument(
+            "--update-only-present-fields",
+            action="store_true",
+            help="Indicates whether to update only present fields in user's data. "
+            "Currently this only works for addresses. "
+            f"Can also be specified as {_MODUSERIMPORT__UPDATEALLFIELDS} "
+            "environment variable.",
+        )
+        folio_parser.add_argument(
+            "--source-type",
+            help="A prefix for the externalSystemId. "
+            f"Can also be specified as {_MODUSERIMPORT__SOURCETYPE} "
+            "environment variable.",
+            type=str,
         )
 
         # https://stackoverflow.com/a/74492728
@@ -164,12 +235,23 @@ class _ParsedArgs:
 def main(args: list[str] | None = None) -> None:
     """Marshalls inputs and executes commands for fuiman."""
     parsed_args = _ParsedArgs(
-        urlparse(os.environ[_FOLIO__ENDPOINT], scheme="https://")
+        folio_endpoint=urlparse(os.environ[_FOLIO__ENDPOINT], scheme="https://")
         if _FOLIO__ENDPOINT in os.environ
         else None,
-        os.environ.get(_FOLIO__TENANT),
-        os.environ.get(_FOLIO__USERNAME),
-        os.environ.get(_FOLIO__PASSWORD),
+        folio_tenant=os.environ.get(_FOLIO__TENANT),
+        folio_username=os.environ.get(_FOLIO__USERNAME),
+        folio_password=os.environ.get(_FOLIO__PASSWORD),
+        batch_size=int(os.environ.get(_BATCH__BATCHSIZE, "1000")),
+        max_concurrency=int(os.environ.get(_BATCH__MAXCONCURRENCY, "6")),
+        retry_count=int(os.environ.get(_BATCH__RETRYCOUNT, "1")),
+        failed_user_threshold=int(os.environ.get(_BATCH__RETRYCOUNT, "0")),
+        deactivate_missing_users=bool(
+            os.environ.get(_MODUSERIMPORT__DEACTIVATEMISSINGUSERS, "0"),
+        ),
+        update_all_fields=bool(
+            os.environ.get(_MODUSERIMPORT__UPDATEALLFIELDS, "0"),
+        ),
+        source_type=os.environ.get(_MODUSERIMPORT__SOURCETYPE),
     )
     parser = _ParsedArgs.parser()
     parsed_args = _ParsedArgs.parser().parse_args(args, namespace=parsed_args)
