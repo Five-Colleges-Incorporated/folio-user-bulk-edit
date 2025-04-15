@@ -1,3 +1,4 @@
+import json
 import typing
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,7 +20,8 @@ class TransformationTestCase:
 class TransformationCases:
     @parametrize(csv=_samples)
     def case_ok(self, csv: Path) -> TransformationTestCase:
-        return TransformationTestCase({"data": csv}, {})
+        res = json.loads((csv.parent / (csv.stem + ".json")).read_text())
+        return TransformationTestCase({"data": csv}, res)
 
 
 @mock.patch("pyfolioclient.FolioBaseClient")

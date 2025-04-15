@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from folio_user_import_manager.data import InputDataOptions
+from folio_user_import_manager.data import InputData, InputDataOptions
 from folio_user_import_manager.folio import Folio, FolioOptions
 
 
@@ -28,6 +28,16 @@ class ImportResults:
 def run(options: ImportOptions) -> ImportResults:
     """Import users into FOLIO."""
     with Folio(options).connect() as folio:
-        folio.post_data("/user-import", payload={})
+        for total, batch in InputData(options).batch(options.batch_size):
+            req = {
+                "users": batch.collect().to_dicts(),
+                "totalRecords": total,
+                "deactivateMissingUsers": options.deactivate_missing_users,
+                "updateOnlyPresentFields": not options.update_all_fields,
+            }
+            if options.source_type:
+                req["sourceType"] = options.source_type
+
+            folio.post_data("/user-import", payload=req)
 
     return ImportResults()
