@@ -1,17 +1,15 @@
-"""Models for import command."""
+"""Command for importing user data into FOLIO."""
 
 from dataclasses import dataclass
 from pathlib import Path
 
+from folio_user_import_manager.data import InputDataOptions
+from folio_user_import_manager.folio import FolioOptions
+
 
 @dataclass(frozen=True)
-class ImportOptions:
+class ImportOptions(InputDataOptions, FolioOptions):
     """Options used for importing users into FOLIO."""
-
-    folio_url: str
-    folio_tenant: str
-    folio_username: str
-    folio_password: str
 
     batch_size: int
     max_concurrency: int
@@ -22,9 +20,15 @@ class ImportOptions:
     update_all_fields: bool
     source_type: str | None
 
-    data_location: Path | dict[str, Path]
-
 
 @dataclass
 class ImportResults:
     """Results of importing users into FOLIO."""
+
+
+def run(options: ImportOptions) -> ImportResults:  # noqa: ARG001
+    """Import users into FOLIO."""
+    return ImportResults()
+
+
+__all__ = ["ImportOptions", "ImportResults", "run"]

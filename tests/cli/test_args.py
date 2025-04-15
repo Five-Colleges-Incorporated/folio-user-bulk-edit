@@ -132,6 +132,7 @@ class CliArgCases:
                 "tenant",
                 "user",
                 "pass",
+                _decoy_csv,
                 2,
                 6,
                 1,
@@ -139,7 +140,6 @@ class CliArgCases:
                 True,  # noqa: FBT003
                 False,  # noqa: FBT003
                 None,
-                _decoy_csv,
             ),
         )
 

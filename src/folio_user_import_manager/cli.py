@@ -126,6 +126,7 @@ class _ParsedArgs:
             self.folio_tenant,
             self.folio_username,
             self.folio_password,
+            self.data_location,
             self.batch_size,
             self.max_concurrency,
             self.retry_count,
@@ -137,7 +138,6 @@ class _ParsedArgs:
             if self.update_all_fields is None
             else self.update_all_fields,
             self.source_type,
-            self.data_location,
         )
 
     @staticmethod
