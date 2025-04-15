@@ -7,15 +7,12 @@ from typing import TextIO
 import pandera.polars as pla
 import polars as pl
 
+from folio_user_import_manager.folio import FolioOptions
+
 
 @dataclass(frozen=True)
-class CheckOptions:
+class CheckOptions(FolioOptions):
     """Options used for checking an import's viability."""
-
-    folio_url: str
-    folio_tenant: str
-    folio_username: str
-    folio_password: str
 
     data_location: Path | dict[str, Path]
 

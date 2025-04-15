@@ -2,48 +2,55 @@
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Protocol
 
-from pyfolioclient import FolioBaseClient
+import httpx
+import pyfolioclient as pfc
+
+
+@dataclass(frozen=True)
+class FolioOptions(Protocol):
+    """Options used for connecting to FOLIO."""
+
+    folio_url: str
+    folio_tenant: str
+    folio_username: str
+    folio_password: str
 
 
 class Folio:
     """The FOLIO connection factory."""
 
-    def __init__(
-        self,
-        base_url: str,
-        tenant: str,
-        username: str,
-        password: str,
-    ) -> None:
+    def __init__(self, options: FolioOptions) -> None:
         """Initializes a new instance of FOLIO."""
-        self._base_url = base_url
-        self._tenant = tenant
-        self._username = username
-        self._password = password
+        self._options = options
 
     @contextmanager
-    def connect(self) -> Iterator[FolioBaseClient]:
+    def connect(self) -> Iterator[pfc.FolioBaseClient]:
         """Connects to FOLIO and returns a pyfolioclient."""
-        with FolioBaseClient(
-            self._base_url,
-            self._tenant,
-            self._username,
-            self._password,
+        with pfc.FolioBaseClient(
+            self._options.folio_url,
+            self._options.folio_tenant,
+            self._options.folio_username,
+            self._options.folio_password,
         ) as c:
             yield c
 
-    def test(self) -> bool:
-        """Test that connection to FOLIO is ok.
+    def test(self) -> str | None:
+        """Test that connection to FOLIO is ok."""
+        try:
+            with pfc.FolioBaseClient(
+                self._options.folio_url,
+                self._options.folio_tenant,
+                self._options.folio_username,
+                self._options.folio_password,
+            ) as _:
+                return None
 
-        It will not handle exceptions and should be called in try block.
-
-        :returns the result of the healthcheck call
-        """
-        with FolioBaseClient(
-            self._base_url,
-            self._tenant,
-            self._username,
-            self._password,
-        ) as folio:
-            return bool(folio.get_data("/admin/health")[0] == "OK")
+        except (httpx.UnsupportedProtocol, ConnectionError):
+            return "Invalid FOLIO Url"
+        except pfc.BadRequestError:
+            return "Invalid Tenant"
+        except (pfc.UnprocessableContentError, RuntimeError):
+            return "Could Not Login"
