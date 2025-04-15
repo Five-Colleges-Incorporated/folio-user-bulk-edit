@@ -6,7 +6,7 @@ description = "Initiates, monitors, and reports on mod-user-import operations in
 authors = [
     {name = "Katherine Bargar", email = "kbargar@fivecolleges.edu"},
 ]
-dependencies = ["polars<1.23", "pandera[polars]>=0.19"]
+dependencies = ["polars<1.23", "pandera[polars]>=0.19", "pyfolioclient>=0.1.2"]
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -49,7 +49,7 @@ ignore = ["ANN401", "D105", "FIX002", "PLR2004", "TD002", "TD003", "COM812"]
 pydocstyle.convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "**/tests/*" = ["D", "INP001", "N813", "S101"]
-"src/**/_schema.py" = ["N815"]
+"src/**/schemas.py" = ["N815"]
 
 [tool.pdm]
 distribution = true

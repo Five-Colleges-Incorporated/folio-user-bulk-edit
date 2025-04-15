@@ -1,23 +1,18 @@
-"""Models for check command."""
+"""Command for quickly checking required inputs."""
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TextIO
 
 import pandera.polars as pla
 import polars as pl
 
+from folio_user_import_manager.data import InputData, InputDataOptions
+from folio_user_import_manager.folio import Folio, FolioOptions
+
 
 @dataclass(frozen=True)
-class CheckOptions:
+class CheckOptions(InputDataOptions, FolioOptions):
     """Options used for checking an import's viability."""
-
-    folio_url: str
-    folio_tenant: str
-    folio_username: str
-    folio_password: str
-
-    data_location: Path | dict[str, Path]
 
 
 @dataclass
@@ -68,3 +63,8 @@ class CheckResults:
                     report.append(f"\t{k}: {v}")
 
         stream.writelines("\n".join(report) + "\n")
+
+
+def run(options: CheckOptions) -> CheckResults:
+    """Checks for connectivity and data validity."""
+    return CheckResults(Folio(options).test(), *InputData(options).test())

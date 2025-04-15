@@ -1,17 +1,19 @@
 from pytest_cases import parametrize, parametrize_with_cases
 
-_okapi = "folio-snapshot-okapi.dev.folio.org"
-_eureka = "folio-etesting-snapshot-kong.ci.folio.org"
+_okapi = "https://folio-snapshot-okapi.dev.folio.org"
+_eureka = "https://folio-etesting-snapshot-kong.ci.folio.org"
 _tenant = "diku"
 _username = "diku_admin"
 _password = "admin"  # noqa:S105
 
 
 class FolioErrorCases:
+    @parametrize(reason=("https://bad.url", _okapi.split("/")[-1]))
     def case_url(
         self,
+        reason: str,
     ) -> tuple[str, ...]:
-        return ("bad.url", _tenant, _username, _password, "Invalid FOLIO Url")
+        return (reason, _tenant, _username, _password, "Invalid FOLIO Url")
 
     @parametrize(env=(_okapi, _eureka))
     def case_services_url(
@@ -23,7 +25,7 @@ class FolioErrorCases:
             _tenant,
             _username,
             _password,
-            "Invalid FOLIO Services Url",
+            "Could Not Login",
         )
 
     @parametrize(env=(_okapi, _eureka))
@@ -36,7 +38,7 @@ class FolioErrorCases:
             "bad-tenant",
             _username,
             _password,
-            "No such Tenant bad-tenant" if env == _okapi else "tenant_not_enabled",
+            "Invalid Tenant",
         )
 
     @parametrize(env=(_okapi, _eureka))
@@ -49,7 +51,7 @@ class FolioErrorCases:
             _tenant,
             "bad-username",
             _password,
-            "username.incorrect" if env == _okapi else "unauthorized_error",
+            "Could Not Login",
         )
 
     @parametrize(env=(_okapi, _eureka))
@@ -62,7 +64,7 @@ class FolioErrorCases:
             _tenant,
             _username,
             "bad-password",
-            "password.incorrect" if env == _okapi else "unauthorized_error",
+            "Could Not Login",
         )
 
 
