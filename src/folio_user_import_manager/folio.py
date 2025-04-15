@@ -39,12 +39,7 @@ class Folio:
     def test(self) -> str | None:
         """Test that connection to FOLIO is ok."""
         try:
-            with pfc.FolioBaseClient(
-                self._options.folio_url,
-                self._options.folio_tenant,
-                self._options.folio_username,
-                self._options.folio_password,
-            ) as _:
+            with self.connect() as _:
                 return None
 
         except (httpx.UnsupportedProtocol, ConnectionError):
