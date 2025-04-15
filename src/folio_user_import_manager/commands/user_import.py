@@ -1,7 +1,6 @@
 """Command for importing user data into FOLIO."""
 
 from dataclasses import dataclass
-from pathlib import Path
 
 from folio_user_import_manager.data import InputDataOptions
 from folio_user_import_manager.folio import FolioOptions
@@ -29,6 +28,3 @@ class ImportResults:
 def run(options: ImportOptions) -> ImportResults:  # noqa: ARG001
     """Import users into FOLIO."""
     return ImportResults()
-
-
-__all__ = ["ImportOptions", "ImportResults", "run"]

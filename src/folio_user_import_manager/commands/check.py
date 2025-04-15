@@ -65,9 +65,6 @@ class CheckResults:
         stream.writelines("\n".join(report) + "\n")
 
 
-__all__ = ["CheckOptions", "CheckResults", "run"]
-
-
 def run(options: CheckOptions) -> CheckResults:
     """Checks for connectivity and data validity."""
     return CheckResults(Folio(options).test(), *InputData(options).test())
