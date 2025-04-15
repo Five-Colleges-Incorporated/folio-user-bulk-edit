@@ -1,3 +1,4 @@
+"""Panderas Schemas for FOLIO user data."""
 import json
 from urllib.parse import urlparse
 

@@ -49,7 +49,7 @@ ignore = ["ANN401", "D105", "FIX002", "PLR2004", "TD002", "TD003", "COM812"]
 pydocstyle.convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "**/tests/*" = ["D", "INP001", "N813", "S101"]
-"src/**/_schema.py" = ["N815"]
+"src/**/schemas.py" = ["N815"]
 
 [tool.pdm]
 distribution = true

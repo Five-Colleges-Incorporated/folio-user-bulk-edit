@@ -1,20 +1,18 @@
 """Models for check command."""
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TextIO
 
 import pandera.polars as pla
 import polars as pl
 
+from folio_user_import_manager.data import InputDataOptions
 from folio_user_import_manager.folio import FolioOptions
 
 
 @dataclass(frozen=True)
-class CheckOptions(FolioOptions):
+class CheckOptions(InputDataOptions, FolioOptions):
     """Options used for checking an import's viability."""
-
-    data_location: Path | dict[str, Path]
 
 
 @dataclass
