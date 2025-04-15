@@ -6,7 +6,7 @@ description = "Initiates, monitors, and reports on mod-user-import operations in
 authors = [
     {name = "Katherine Bargar", email = "kbargar@fivecolleges.edu"},
 ]
-dependencies = ["polars<1.23", "pandera[polars]>=0.19"]
+dependencies = ["polars<1.23", "pandera[polars]>=0.19", "pyfolioclient>=0.1.2"]
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "Apache-2.0"}
