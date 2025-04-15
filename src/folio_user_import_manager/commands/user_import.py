@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 from folio_user_import_manager.data import InputDataOptions
-from folio_user_import_manager.folio import FolioOptions
+from folio_user_import_manager.folio import Folio, FolioOptions
 
 
 @dataclass(frozen=True)
@@ -25,6 +25,9 @@ class ImportResults:
     """Results of importing users into FOLIO."""
 
 
-def run(options: ImportOptions) -> ImportResults:  # noqa: ARG001
+def run(options: ImportOptions) -> ImportResults:
     """Import users into FOLIO."""
+    with Folio(options).connect() as folio:
+        folio.post_data("/user-import", payload={})
+
     return ImportResults()
