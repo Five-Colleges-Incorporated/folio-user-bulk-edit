@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 
 import pandera.polars as pla
 import polars as pl
@@ -11,7 +10,7 @@ from .schemas import UserImportSchema
 
 
 @dataclass(frozen=True)
-class InputDataOptions(Protocol):
+class InputDataOptions:
     """Options used for reading input data."""
 
     data_location: Path | dict[str, Path]

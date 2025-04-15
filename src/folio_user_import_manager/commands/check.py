@@ -1,4 +1,4 @@
-"""Models for check command."""
+"""Command for quickly checking required inputs."""
 
 from dataclasses import dataclass
 from typing import TextIO
@@ -6,8 +6,8 @@ from typing import TextIO
 import pandera.polars as pla
 import polars as pl
 
-from folio_user_import_manager.data import InputDataOptions
-from folio_user_import_manager.folio import FolioOptions
+from folio_user_import_manager.data import InputData, InputDataOptions
+from folio_user_import_manager.folio import Folio, FolioOptions
 
 
 @dataclass(frozen=True)
@@ -63,3 +63,11 @@ class CheckResults:
                     report.append(f"\t{k}: {v}")
 
         stream.writelines("\n".join(report) + "\n")
+
+
+__all__ = ["CheckOptions", "CheckResults", "run"]
+
+
+def run(options: CheckOptions) -> CheckResults:
+    """Checks for connectivity and data validity."""
+    return CheckResults(Folio(options).test(), *InputData(options).test())

@@ -3,14 +3,13 @@
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Protocol
 
 import httpx
 import pyfolioclient as pfc
 
 
 @dataclass(frozen=True)
-class FolioOptions(Protocol):
+class FolioOptions:
     """Options used for connecting to FOLIO."""
 
     folio_url: str
