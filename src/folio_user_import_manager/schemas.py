@@ -1,4 +1,5 @@
 """Panderas Schemas for FOLIO user data."""
+
 import json
 from urllib.parse import urlparse
 
@@ -193,12 +194,14 @@ class UserImportSchema(
     _PersonalSchema,
     _AddressesSchema,
 ):
+    """Panderas DataFrameModel for FOLIO's user import endpoint."""
+
     tags: str | None = pla.Field(nullable=True)
     customFields: str | None = pla.Field(nullable=True)
 
     @pla.check("customFields", element_wise=True)
     @classmethod
-    def valid_json(cls, data: str) -> bool:
+    def _valid_json(cls, data: str) -> bool:
         try:
             json.loads(data)
         except ValueError:
@@ -207,4 +210,6 @@ class UserImportSchema(
         return True
 
     class Config:
+        """Define DataFrameSchema-wide options."""
+
         strict = True
