@@ -3,6 +3,7 @@
 import typing
 from dataclasses import dataclass
 
+import httpx
 import polars as pl
 import polars.selectors as cs
 
@@ -27,6 +28,9 @@ class ImportOptions(InputDataOptions, FolioOptions):
 @dataclass
 class ImportResults:
     """Results of importing users into FOLIO."""
+
+    created_records: int = 0
+    failed_records: int = 0
 
 
 def _clean_nones(obj: dict[str, typing.Any]) -> dict[str, typing.Any]:
@@ -122,6 +126,7 @@ def _transform_batch(batch: pl.LazyFrame) -> pl.LazyFrame:
 
 def run(options: ImportOptions) -> ImportResults:
     """Import users into FOLIO."""
+    import_results = ImportResults()
     with Folio(options).connect() as folio:
         for total, b in InputData(options).batch(options.batch_size):
             batch = _transform_batch(b)
@@ -135,6 +140,18 @@ def run(options: ImportOptions) -> ImportResults:
             if options.source_type:
                 req["sourceType"] = options.source_type
 
-            folio.post_data("/user-import", payload=req)
+            tries = 0
+            while tries < 1 + options.retry_count:
+                tries = tries + 1
+                try:
+                    res = folio.post_data("/user-import", payload=req)
+                    if isinstance(res, int):
+                        res_err = f"Expected json but got http code {res}"
+                        raise TypeError(res_err)
+                    import_results.created_records += int(res["createdRecords"])
+                    import_results.failed_records += int(res["failedRecords"])
+                    break
+                except httpx.HTTPError:
+                    pass
 
-    return ImportResults()
+    return import_results

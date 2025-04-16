@@ -26,14 +26,16 @@ class TransformationCases:
 
 @mock.patch("pyfolioclient.FolioBaseClient")
 @parametrize_with_cases("tc", TransformationCases)
-def test_check_data(
+def test_transform_data(
     base_client_mock: mock.Mock,
     tc: TransformationTestCase,
 ) -> None:
     import folio_user_import_manager.commands.user_import as uut
 
     # I couldn't figure this out better
-    post_data_mock = base_client_mock().__enter__().post_data
+    post_data_mock: mock.MagicMock = (
+        base_client_mock.return_value.__enter__.return_value.post_data
+    )
 
     uut.run(
         uut.ImportOptions(
