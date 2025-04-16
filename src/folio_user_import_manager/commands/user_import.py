@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import httpx
 import polars as pl
 import polars.selectors as cs
+from pyfolioclient import BadRequestError, UnprocessableContentError
 
 from folio_user_import_manager.data import InputData, InputDataOptions
 from folio_user_import_manager.folio import Folio, FolioOptions
@@ -150,8 +151,11 @@ def run(options: ImportOptions) -> ImportResults:
                     import_results.created_records += int(res["createdRecords"])
                     import_results.failed_records += int(res["failedRecords"])
                     break
-                except httpx.HTTPError:
+                except (httpx.HTTPError, ConnectionError, TimeoutError, RuntimeError):
                     tries = tries + 1
+                except (BadRequestError, UnprocessableContentError):
+                    tries = 1 + options.retry_count
+
             if tries == 1 + options.retry_count:
                 import_results.failed_records += total
 

@@ -6,6 +6,7 @@ from unittest import mock
 
 import httpx
 import polars as pl
+import pyfolioclient as pfc
 from pytest_cases import parametrize, parametrize_with_cases
 
 
@@ -47,6 +48,32 @@ class RetryCases:
             retry_count + 1,
             0,
             100,
+        )
+
+    @parametrize(error=[pfc.BadRequestError, pfc.UnprocessableContentError])
+    def case_not_retryable(self, error: Exception, tmpdir: str) -> RetryCase:
+        data = Path(tmpdir) / "data.csv"
+        return RetryCase(
+            data,
+            100000,
+            [error],
+            1,
+            0,
+            100,
+        )
+
+    @parametrize(
+        error=[ConnectionError, TimeoutError, RuntimeError, httpx.HTTPError("")],
+    )
+    def case_retryable(self, error: Exception, tmpdir: str) -> RetryCase:
+        data = Path(tmpdir) / "data.csv"
+        return RetryCase(
+            data,
+            100000,
+            [error],
+            2,
+            100,
+            0,
         )
 
 
