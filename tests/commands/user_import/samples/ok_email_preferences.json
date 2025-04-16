@@ -1,0 +1,19 @@
+{
+	"users": [
+		{
+			"username": "user1",
+			"externalSystemId": "user1@external.com",
+			"preferredEmailCommunication": [
+				"Support",
+				"Programs"
+			]
+		},
+		{
+			"username": "user2",
+			"externalSystemId": "user2@external.com"
+		}
+	],
+	"totalRecords": 2,
+	"deactivateMissingUsers": false,
+	"updateOnlyPresentFields": true
+}

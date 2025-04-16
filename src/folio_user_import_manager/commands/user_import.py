@@ -46,6 +46,10 @@ def run(options: ImportOptions) -> ImportResults:
             cols = batch.collect_schema().names()
             if "departments" in cols:
                 batch = batch.with_columns(pl.col("departments").str.split(","))
+            if "preferredEmailCommunication" in cols:
+                batch = batch.with_columns(
+                    pl.col("preferredEmailCommunication").str.split(","),
+                )
             if "customFields" in cols:
                 batch = batch.with_columns(pl.col("customFields").str.json_decode())
 
