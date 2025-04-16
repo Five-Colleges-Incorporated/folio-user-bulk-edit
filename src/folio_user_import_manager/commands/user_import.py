@@ -31,7 +31,7 @@ class ImportResults:
 
 def _clean_nones(obj: dict[str, typing.Any]) -> dict[str, typing.Any]:
     for k in list(obj.keys()):
-        if k in ["customFields"]:
+        if k in ["customFields", "personal"]:
             _clean_nones(obj[k])
         if obj[k] is None:
             del obj[k]
@@ -45,14 +45,13 @@ def run(options: ImportOptions) -> ImportResults:
         for total, b in InputData(options).batch(options.batch_size):
             batch = b
             cols = batch.collect_schema().names()
-            if "departments" in cols:
-                batch = batch.with_columns(pl.col("departments").str.split(","))
-            if "preferredEmailCommunication" in cols:
-                batch = batch.with_columns(
-                    pl.col("preferredEmailCommunication").str.split(","),
-                )
-            if "customFields" in cols:
-                batch = batch.with_columns(pl.col("customFields").str.json_decode())
+            for c in cols:
+                if c in ["departments", "preferredEmailCommunication"]:
+                    batch = batch.with_columns(pl.col(c).str.split(","))
+                if c in ["customFields"]:
+                    batch = batch.with_columns(pl.col(c).str.json_decode())
+                if c in ["personal_dateOfBirth"]:
+                    batch = batch.with_columns(pl.col(c).dt.to_string())
 
             cs_personal = cs.starts_with("personal_")
 

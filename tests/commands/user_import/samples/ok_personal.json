@@ -1,0 +1,25 @@
+{
+	"users": [
+		{
+			"username": "user1",
+			"externalSystemId": "user1@external.com",
+			"personal": {
+				"lastName": "last",
+				"email": "ok@email.com",
+				"dateOfBirth": "1999-01-01",
+				"preferredContactTypeId": "text",
+				"profilePictureLink": "http://profile.com"
+			}
+		},
+		{
+			"username": "user2",
+			"externalSystemId": "user2@external.com",
+			"personal": {
+				"lastName": "name"
+			}
+		}
+	],
+	"totalRecords": 2,
+	"deactivateMissingUsers": false,
+	"updateOnlyPresentFields": true
+}
