@@ -31,7 +31,7 @@ class ImportResults:
 
 def _clean_nones(obj: dict[str, typing.Any]) -> dict[str, typing.Any]:
     for k in list(obj.keys()):
-        if k in ["customFields", "personal"]:
+        if k in ["customFields", "personal", "requestPreference"]:
             _clean_nones(obj[k])
         if obj[k] is None:
             del obj[k]
@@ -54,6 +54,7 @@ def run(options: ImportOptions) -> ImportResults:
                     batch = batch.with_columns(pl.col(c).dt.to_string())
 
             cs_personal = cs.starts_with("personal_")
+            cs_req_pref = cs.starts_with("requestPreference_")
 
             personal_names = [
                 c.replace("personal_", "") for c in cols if c.startswith("personal")
@@ -65,7 +66,19 @@ def run(options: ImportOptions) -> ImportResults:
                     .alias("personal"),
                 )
 
-            batch = batch.select(cs.all() - cs_personal)
+            req_pref_names = [
+                c.replace("requestPreference_", "")
+                for c in cols
+                if c.startswith("requestPreference_")
+            ]
+            if any(req_pref_names):
+                batch = batch.with_columns(
+                    pl.struct(cs_req_pref)
+                    .struct.rename_fields(req_pref_names)
+                    .alias("requestPreference"),
+                )
+
+            batch = batch.select(cs.all() - cs_personal - cs_req_pref)
             users = [_clean_nones(u) for u in batch.collect().to_dicts()]
             req = {
                 "users": users,
