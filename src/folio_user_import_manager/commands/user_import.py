@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+import polars as pl
+
 from folio_user_import_manager.data import InputData, InputDataOptions
 from folio_user_import_manager.folio import Folio, FolioOptions
 
@@ -28,9 +30,20 @@ class ImportResults:
 def run(options: ImportOptions) -> ImportResults:
     """Import users into FOLIO."""
     with Folio(options).connect() as folio:
-        for total, batch in InputData(options).batch(options.batch_size):
+        for total, b in InputData(options).batch(options.batch_size):
+            batch = b
+            cols = batch.collect_schema().names()
+            if "departments" in cols:
+                batch = batch.with_columns(pl.col("departments").str.split(","))
+
+            users = batch.collect().to_dicts()
+            for u in users:
+                for k in list(u.keys()):
+                    if u[k] is None:
+                        del u[k]
+
             req = {
-                "users": batch.collect().to_dicts(),
+                "users": users,
                 "totalRecords": total,
                 "deactivateMissingUsers": options.deactivate_missing_users,
                 "updateOnlyPresentFields": not options.update_all_fields,
