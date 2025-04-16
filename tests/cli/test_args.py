@@ -43,7 +43,7 @@ class CliArgCases:
             {},
             "pass",
             expected_options=CheckOptions(
-                "folio.org",
+                "http://folio.org",
                 "tenant",
                 "user",
                 "pass",
@@ -62,7 +62,7 @@ class CliArgCases:
             },
             "",
             expected_options=CheckOptions(
-                "folio.org",
+                "http://folio.org",
                 "tenant",
                 "user",
                 "pass",
@@ -105,7 +105,7 @@ class CliArgCases:
             },
             "",
             expected_options=CheckOptions(
-                "folio.org",
+                "http://folio.org",
                 "tenant",
                 "another_user",
                 "pass",
@@ -128,7 +128,7 @@ class CliArgCases:
             },
             "",
             expected_options=ImportOptions(
-                "folio.org",
+                "http://folio.org",
                 "tenant",
                 "user",
                 "pass",
@@ -140,6 +140,20 @@ class CliArgCases:
                 True,  # noqa: FBT003
                 False,  # noqa: FBT003
                 None,
+            ),
+        )
+
+    def case_default_scheme(self) -> CliArgCase:
+        return CliArgCase(
+            "-e folio.org -t tenant -u user -p check decoy.csv",
+            {},
+            "pass",
+            expected_options=CheckOptions(
+                "https://folio.org",
+                "tenant",
+                "user",
+                "pass",
+                _decoy_csv,
             ),
         )
 

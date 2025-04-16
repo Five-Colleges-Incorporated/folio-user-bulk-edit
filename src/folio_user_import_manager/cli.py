@@ -5,9 +5,9 @@ import getpass
 import os
 import sys
 from dataclasses import dataclass
-from functools import lru_cache, partial
+from functools import lru_cache
 from pathlib import Path
-from urllib.parse import ParseResult, urlparse
+from urllib.parse import ParseResult, urlparse, urlunparse
 
 from folio_user_import_manager import _cli_log
 from folio_user_import_manager.commands import check, user_import
@@ -25,6 +25,14 @@ _BATCH__FAILEDUSERTHRESHOLD = "FUIMAN__BATCHSETTINGS__FAILEDUSERTHRESHOLD"
 _MODUSERIMPORT__DEACTIVATEMISSINGUSERS = "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS"
 _MODUSERIMPORT__UPDATEALLFIELDS = "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS"
 _MODUSERIMPORT__SOURCETYPE = "FUIMAN__MODUSERIMPORT__SOURCETYPE"
+
+
+def _url_param(param: str) -> ParseResult:
+    # Following the syntax specifications in RFC 1808,
+    # urlparse recognizes a netloc only if it is properly introduced by '//'
+    if "//" not in param:
+        param = "//" + param
+    return urlparse(param, scheme="https")
 
 
 @dataclass
@@ -66,7 +74,7 @@ class _ParsedArgs:
         if self.folio_endpoint is None:
             return None
 
-        return self.folio_endpoint.netloc
+        return urlunparse(self.folio_endpoint[:2] + ("", "", None, None))
 
     @property
     def data_location(self) -> Path | dict[str, Path] | None:
@@ -156,7 +164,7 @@ class _ParsedArgs:
             "--folio-endpoint",
             help="Service url of the folio instance. "
             f"Can also be specified as {_FOLIO__ENDPOINT} environment variable.",
-            type=partial(urlparse, scheme="https"),
+            type=_url_param,
         )
         folio_parser.add_argument(
             "-t",
@@ -274,7 +282,7 @@ class _ParsedArgs:
 def main(args: list[str] | None = None) -> None:
     """Marshalls inputs and executes commands for fuiman."""
     parsed_args = _ParsedArgs(
-        folio_endpoint=urlparse(os.environ[_FOLIO__ENDPOINT], scheme="https://")
+        folio_endpoint=_url_param(os.environ[_FOLIO__ENDPOINT])
         if _FOLIO__ENDPOINT in os.environ
         else None,
         folio_tenant=os.environ.get(_FOLIO__TENANT),
