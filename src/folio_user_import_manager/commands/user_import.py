@@ -1,5 +1,6 @@
 """Command for importing user data into FOLIO."""
 
+import typing
 from dataclasses import dataclass
 
 import polars as pl
@@ -27,6 +28,16 @@ class ImportResults:
     """Results of importing users into FOLIO."""
 
 
+def _clean_nones(obj: dict[str, typing.Any]) -> dict[str, typing.Any]:
+    for k in list(obj.keys()):
+        if k in ["customFields"]:
+            _clean_nones(obj[k])
+        if obj[k] is None:
+            del obj[k]
+
+    return obj
+
+
 def run(options: ImportOptions) -> ImportResults:
     """Import users into FOLIO."""
     with Folio(options).connect() as folio:
@@ -38,12 +49,7 @@ def run(options: ImportOptions) -> ImportResults:
             if "customFields" in cols:
                 batch = batch.with_columns(pl.col("customFields").str.json_decode())
 
-            users = batch.collect().to_dicts()
-            for u in users:
-                for k in list(u.keys()):
-                    if u[k] is None:
-                        del u[k]
-
+            users = [_clean_nones(u) for u in batch.collect().to_dicts()]
             req = {
                 "users": users,
                 "totalRecords": total,

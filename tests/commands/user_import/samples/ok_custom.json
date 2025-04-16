@@ -9,7 +9,10 @@
 		},
 		{
 			"username": "user2",
-			"externalSystemId": "user2@external.com"
+			"externalSystemId": "user2@external.com",
+			"customFields": {
+				"A": "different custom field"
+			}
 		}
 	],
 	"totalRecords": 2,
