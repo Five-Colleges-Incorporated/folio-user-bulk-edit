@@ -4,6 +4,7 @@ import typing
 from dataclasses import dataclass
 
 import polars as pl
+import polars.selectors as cs
 
 from folio_user_import_manager.data import InputData, InputDataOptions
 from folio_user_import_manager.folio import Folio, FolioOptions
@@ -53,6 +54,19 @@ def run(options: ImportOptions) -> ImportResults:
             if "customFields" in cols:
                 batch = batch.with_columns(pl.col("customFields").str.json_decode())
 
+            cs_personal = cs.starts_with("personal_")
+
+            personal_names = [
+                c.replace("personal_", "") for c in cols if c.startswith("personal")
+            ]
+            if any(personal_names):
+                batch = batch.with_columns(
+                    pl.struct(cs_personal)
+                    .struct.rename_fields(personal_names)
+                    .alias("personal"),
+                )
+
+            batch = batch.select(cs.all() - cs_personal)
             users = [_clean_nones(u) for u in batch.collect().to_dicts()]
             req = {
                 "users": users,
