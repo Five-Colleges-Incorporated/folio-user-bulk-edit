@@ -332,7 +332,7 @@ def main(args: list[str] | None = None) -> None:
         except ValueError:
             parser.print_usage()
             raise
-        user_import.run(i_opts)
+        user_import.run(i_opts).write_results(sys.stdout)
 
 
 if __name__ == "__main__":

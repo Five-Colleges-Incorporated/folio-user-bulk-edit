@@ -34,6 +34,15 @@ class ImportResults:
     updated_records: int = 0
     failed_records: int = 0
 
+    def write_results(self, stream: typing.TextIO) -> None:
+        """Pretty prints the results of the check."""
+        report = []
+        report.append(f"{self.created_records} users created")
+        report.append(f"{self.updated_records} users updated")
+        report.append(f"{self.failed_records} users failed to create/update")
+
+        stream.writelines("\n".join(report) + "\n")
+
 
 def _clean_nones(obj: dict[str, typing.Any]) -> dict[str, typing.Any]:
     for k in list(obj.keys()):
