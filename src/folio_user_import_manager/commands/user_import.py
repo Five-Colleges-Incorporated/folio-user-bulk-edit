@@ -50,7 +50,7 @@ def run(options: ImportOptions) -> ImportResults:
                     batch = batch.with_columns(pl.col(c).str.split(","))
                 if c in ["customFields"]:
                     batch = batch.with_columns(pl.col(c).str.json_decode())
-                if c in ["personal_dateOfBirth"]:
+                if c in ["enrollmentDate", "expirationDate", "personal_dateOfBirth"]:
                     batch = batch.with_columns(pl.col(c).dt.to_string())
 
             cs_personal = cs.starts_with("personal_")

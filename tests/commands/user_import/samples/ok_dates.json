@@ -1,0 +1,17 @@
+{
+	"users": [
+		{
+			"username": "user1",
+			"externalSystemId": "user1@external.com",
+			"enrollmentDate": "2025-04-08"
+		},
+		{
+			"username": "user2",
+			"externalSystemId": "user2@external.com",
+			"expirationDate": "2025-04-08"
+		}
+	],
+	"totalRecords": 2,
+	"deactivateMissingUsers": false,
+	"updateOnlyPresentFields": true
+}
