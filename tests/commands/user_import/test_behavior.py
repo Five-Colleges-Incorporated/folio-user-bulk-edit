@@ -37,6 +37,18 @@ class RetryCases:
             0,
         )
 
+    def case_retry_not_ok(self, tmpdir: str) -> RetryCase:
+        data = Path(tmpdir) / "data.csv"
+        retry_count = 2
+        return RetryCase(
+            data,
+            retry_count,
+            [httpx.HTTPError("") for _ in range(retry_count + 1)],
+            retry_count + 1,
+            0,
+            100,
+        )
+
 
 @mock.patch("pyfolioclient.FolioBaseClient")
 @parametrize_with_cases("tc", RetryCases)
@@ -61,7 +73,7 @@ def test_retry(base_client_mock: mock.Mock, tc: RetryCase) -> None:
                 "",
                 "",
                 tc.data_location,
-                tc.created_records + 1,
+                tc.created_records + tc.failed_records + 1,
                 1,
                 tc.retry_count,
                 100.0,

@@ -142,7 +142,6 @@ def run(options: ImportOptions) -> ImportResults:
 
             tries = 0
             while tries < 1 + options.retry_count:
-                tries = tries + 1
                 try:
                     res = folio.post_data("/user-import", payload=req)
                     if isinstance(res, int):
@@ -152,6 +151,8 @@ def run(options: ImportOptions) -> ImportResults:
                     import_results.failed_records += int(res["failedRecords"])
                     break
                 except httpx.HTTPError:
-                    pass
+                    tries = tries + 1
+            if tries == 1 + options.retry_count:
+                import_results.failed_records += total
 
     return import_results
