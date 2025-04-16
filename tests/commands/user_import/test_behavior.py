@@ -11,18 +11,22 @@ from pytest_cases import parametrize, parametrize_with_cases
 
 
 @dataclass
-class RetryCase:
+class BehaviorCase:
     data_location: Path
-    retry_count: int
-    side_effect: list[Exception]
-    call_count: int
-    created_records: int
-    failed_records: int
 
     @contextmanager
     def setup(self) -> typing.Any:
         pl.DataFrame({"row": list(range(100))}).write_csv(self.data_location)
         yield
+
+
+@dataclass
+class RetryCase(BehaviorCase):
+    retry_count: int
+    side_effect: list[Exception]
+    call_count: int
+    created_records: int
+    failed_records: int
 
 
 class RetryCases:
@@ -114,3 +118,49 @@ def test_retry(base_client_mock: mock.Mock, tc: RetryCase) -> None:
     assert post_data_mock.call_count == tc.call_count
     assert res.created_records == tc.created_records
     assert res.failed_records == tc.failed_records
+
+
+@mock.patch("pyfolioclient.FolioBaseClient")
+def test_batch(base_client_mock: mock.Mock, tmpdir: str) -> None:
+    import folio_user_import_manager.commands.user_import as uut
+
+    tc = BehaviorCase(Path(tmpdir) / "data.csv")
+
+    # I couldn't figure this out better
+    post_data_mock: mock.MagicMock = (
+        base_client_mock.return_value.__enter__.return_value.post_data
+    )
+    post_data_mock.side_effect = [
+        {
+            "createdRecords": 15,
+            "updatedRecords": 5,
+            "failedRecords": 0,
+        },
+        httpx.HTTPError(""),
+        {
+            "createdRecords": 10,
+            "updatedRecords": 10,
+            "failedRecords": 0,
+        },
+    ]
+
+    with tc.setup():
+        res = uut.run(
+            uut.ImportOptions(
+                "",
+                "",
+                "",
+                "",
+                tc.data_location,
+                35,
+                1,
+                0,
+                100.0,
+                deactivate_missing_users=False,
+                update_all_fields=False,
+                source_type=None,
+            ),
+        )
+        assert res.created_records == 25
+        assert res.updated_records == 15
+        assert res.failed_records == 35
