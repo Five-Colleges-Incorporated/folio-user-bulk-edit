@@ -17,9 +17,7 @@ class ImportOptions(InputDataOptions, FolioOptions):
     """Options used for importing users into FOLIO."""
 
     batch_size: int
-    max_concurrency: int
     retry_count: int
-    failed_user_threshold: float
 
     deactivate_missing_users: bool
     update_all_fields: bool

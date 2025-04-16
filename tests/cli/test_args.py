@@ -122,7 +122,6 @@ class CliArgCases:
                 "FUIMAN__FOLIO__USERNAME": "user",
                 "FUIMAN__FOLIO__PASSWORD": "pass",
                 "FUIMAN__BATCHSETTINGS__BATCHSIZE": "1",
-                "FUIMAN__BATCHSETTINGS__FAILEDUSERTHRESHOLD": "30",
                 "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS": "1",
                 "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS": "1",
             },
@@ -134,9 +133,7 @@ class CliArgCases:
                 "pass",
                 _decoy_csv,
                 2,
-                6,
                 1,
-                0.3,
                 True,  # noqa: FBT003
                 False,  # noqa: FBT003
                 None,

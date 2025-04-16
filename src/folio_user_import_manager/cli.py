@@ -18,9 +18,7 @@ _FOLIO__USERNAME = "FUIMAN__FOLIO__USERNAME"
 _FOLIO__PASSWORD = "FUIMAN__FOLIO__PASSWORD"  # noqa:S105
 
 _BATCH__BATCHSIZE = "FUIMAN__BATCHSETTINGS__BATCHSIZE"
-_BATCH__MAXCONCURRENCY = "FUIMAN__BATCHSETTINGS__MAXCONCURRENCY"
 _BATCH__RETRYCOUNT = "FUIMAN__BATCHSETTINGS__RETRYCOUNT"
-_BATCH__FAILEDUSERTHRESHOLD = "FUIMAN__BATCHSETTINGS__FAILEDUSERTHRESHOLD"
 
 _MODUSERIMPORT__DEACTIVATEMISSINGUSERS = "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS"
 _MODUSERIMPORT__UPDATEALLFIELDS = "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS"
@@ -39,9 +37,7 @@ def _url_param(param: str) -> ParseResult:
 class _ParsedArgs:
     # These have internal defaults, env vars, and cli flags
     batch_size: int
-    max_concurrency: int
     retry_count: int
-    failed_user_threshold: int
     default_deactivate_missing_users: bool
     default_update_all_fields: bool
 
@@ -136,9 +132,7 @@ class _ParsedArgs:
             self.folio_password,
             self.data_location,
             self.batch_size,
-            self.max_concurrency,
             self.retry_count,
-            self.failed_user_threshold / 100,
             self.default_deactivate_missing_users
             if self.deactivate_missing_users is None
             else self.deactivate_missing_users,
@@ -196,22 +190,9 @@ class _ParsedArgs:
             type=int,
         )
         folio_parser.add_argument(
-            "--max-concurrency",
-            help="Maximum number of requests to be sending to FOLIO at a time. "
-            f"Can also be specified as {_BATCH__MAXCONCURRENCY} environment variable.",
-            type=int,
-        )
-        folio_parser.add_argument(
             "--retry-count",
             help="Maximum number times a failed request can be retried. "
             f"Can also be specified as {_BATCH__RETRYCOUNT} environment variable.",
-            type=int,
-        )
-        folio_parser.add_argument(
-            "--failed-user-threshold",
-            help="Percentage of users that failed to create/update triggering a retry. "
-            f"Can also be specified as {_BATCH__FAILEDUSERTHRESHOLD} "
-            "environment variable.",
             type=int,
         )
 
@@ -289,9 +270,7 @@ def main(args: list[str] | None = None) -> None:
         folio_username=os.environ.get(_FOLIO__USERNAME),
         folio_password=os.environ.get(_FOLIO__PASSWORD),
         batch_size=int(os.environ.get(_BATCH__BATCHSIZE, "1000")),
-        max_concurrency=int(os.environ.get(_BATCH__MAXCONCURRENCY, "6")),
         retry_count=int(os.environ.get(_BATCH__RETRYCOUNT, "1")),
-        failed_user_threshold=int(os.environ.get(_BATCH__FAILEDUSERTHRESHOLD, "0")),
         default_deactivate_missing_users=os.environ.get(
             _MODUSERIMPORT__DEACTIVATEMISSINGUSERS,
             "0",
