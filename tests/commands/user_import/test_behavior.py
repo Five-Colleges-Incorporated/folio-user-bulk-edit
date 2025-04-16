@@ -89,6 +89,7 @@ def test_retry(base_client_mock: mock.Mock, tc: RetryCase) -> None:
     post_data_mock.side_effect = [*tc.side_effect, mock.DEFAULT]
     post_data_mock.return_value = {
         "createdRecords": tc.created_records,
+        "updatedRecords": 0,
         "failedRecords": tc.failed_records,
     }
 

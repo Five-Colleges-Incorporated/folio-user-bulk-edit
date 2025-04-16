@@ -31,6 +31,7 @@ class ImportResults:
     """Results of importing users into FOLIO."""
 
     created_records: int = 0
+    updated_records: int = 0
     failed_records: int = 0
 
 
@@ -149,6 +150,7 @@ def run(options: ImportOptions) -> ImportResults:
                         res_err = f"Expected json but got http code {res}"
                         raise TypeError(res_err)
                     import_results.created_records += int(res["createdRecords"])
+                    import_results.updated_records += int(res["updatedRecords"])
                     import_results.failed_records += int(res["failedRecords"])
                     break
                 except (httpx.HTTPError, ConnectionError, TimeoutError, RuntimeError):
