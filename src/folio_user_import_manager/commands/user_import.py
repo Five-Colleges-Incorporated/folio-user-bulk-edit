@@ -210,7 +210,7 @@ def run(options: ImportOptions) -> ImportResults:
                     in_place=True,
                 )
 
-    import_results.failed_users.select(
+    import_results.failed_users = import_results.failed_users.select(
         "source",
         "username",
         "externalSystemId",

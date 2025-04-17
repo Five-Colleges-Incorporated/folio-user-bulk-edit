@@ -5,6 +5,7 @@ import getpass
 import os
 import sys
 from dataclasses import dataclass
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse, urlunparse
@@ -285,8 +286,11 @@ def main(args: list[str] | None = None) -> None:
     )
     parser = _ParsedArgs.parser()
     parsed_args = parser.parse_args(args, namespace=parsed_args)
+    now = datetime.now(tz=None).strftime("%y%m%d%H%M%S")  # noqa: DTZ005
+
     _cli_log.initialize(
         parsed_args.log_directory,
+        now,
         30 - (parsed_args.verbose * 10),
         20 - (min(1, parsed_args.verbose) * 10),
     )
@@ -311,7 +315,11 @@ def main(args: list[str] | None = None) -> None:
         except ValueError:
             parser.print_usage()
             raise
-        user_import.run(i_opts).write_results(sys.stdout)
+        results = user_import.run(i_opts)
+        results.failed_users.write_csv(
+            parsed_args.log_directory / f"{now}-failedUsers.csv",
+        )
+        results.write_results(sys.stdout)
 
 
 if __name__ == "__main__":
