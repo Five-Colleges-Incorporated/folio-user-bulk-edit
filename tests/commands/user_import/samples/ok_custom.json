@@ -1,0 +1,21 @@
+{
+	"users": [
+		{
+			"username": "user1",
+			"externalSystemId": "user1@external.com",
+			"customFields": {
+				"This": "is a custom field"
+			}
+		},
+		{
+			"username": "user2",
+			"externalSystemId": "user2@external.com",
+			"customFields": {
+				"A": "different custom field"
+			}
+		}
+	],
+	"totalRecords": 2,
+	"deactivateMissingUsers": false,
+	"updateOnlyPresentFields": true
+}

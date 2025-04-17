@@ -18,6 +18,17 @@ type = "lint"
 include = ["*"]
 cmd = ["check-case-conflict"]
 ok_exit_codes = [0]
+[commands."json.check"]
+type = "lint"
+include = ["*.json"]
+cmd = ["check-json"]
+ok_exit_codes = [0]
+[commands."json.format"]
+type = "both"
+include = ["*.json"]
+cmd = ["pretty-format-json", "--indent", "\t", "--no-sort-keys"]
+tidy_flags = ["--autofix"]
+ok_exit_codes = [0]
 
 [commands."ruff.lint"]
 type = "both"

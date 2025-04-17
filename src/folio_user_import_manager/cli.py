@@ -5,9 +5,9 @@ import getpass
 import os
 import sys
 from dataclasses import dataclass
-from functools import lru_cache, partial
+from functools import lru_cache
 from pathlib import Path
-from urllib.parse import ParseResult, urlparse
+from urllib.parse import ParseResult, urlparse, urlunparse
 
 from folio_user_import_manager import _cli_log
 from folio_user_import_manager.commands import check, user_import
@@ -18,22 +18,26 @@ _FOLIO__USERNAME = "FUIMAN__FOLIO__USERNAME"
 _FOLIO__PASSWORD = "FUIMAN__FOLIO__PASSWORD"  # noqa:S105
 
 _BATCH__BATCHSIZE = "FUIMAN__BATCHSETTINGS__BATCHSIZE"
-_BATCH__MAXCONCURRENCY = "FUIMAN__BATCHSETTINGS__MAXCONCURRENCY"
 _BATCH__RETRYCOUNT = "FUIMAN__BATCHSETTINGS__RETRYCOUNT"
-_BATCH__FAILEDUSERTHRESHOLD = "FUIMAN__BATCHSETTINGS__FAILEDUSERTHRESHOLD"
 
 _MODUSERIMPORT__DEACTIVATEMISSINGUSERS = "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS"
 _MODUSERIMPORT__UPDATEALLFIELDS = "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS"
 _MODUSERIMPORT__SOURCETYPE = "FUIMAN__MODUSERIMPORT__SOURCETYPE"
 
 
+def _url_param(param: str) -> ParseResult:
+    # Following the syntax specifications in RFC 1808,
+    # urlparse recognizes a netloc only if it is properly introduced by '//'
+    if "//" not in param:
+        param = "//" + param
+    return urlparse(param, scheme="https")
+
+
 @dataclass
 class _ParsedArgs:
     # These have internal defaults, env vars, and cli flags
     batch_size: int
-    max_concurrency: int
     retry_count: int
-    failed_user_threshold: int
     default_deactivate_missing_users: bool
     default_update_all_fields: bool
 
@@ -66,7 +70,7 @@ class _ParsedArgs:
         if self.folio_endpoint is None:
             return None
 
-        return self.folio_endpoint.netloc
+        return urlunparse(self.folio_endpoint[:2] + ("", "", None, None))
 
     @property
     def data_location(self) -> Path | dict[str, Path] | None:
@@ -128,9 +132,7 @@ class _ParsedArgs:
             self.folio_password,
             self.data_location,
             self.batch_size,
-            self.max_concurrency,
             self.retry_count,
-            self.failed_user_threshold / 100,
             self.default_deactivate_missing_users
             if self.deactivate_missing_users is None
             else self.deactivate_missing_users,
@@ -156,7 +158,7 @@ class _ParsedArgs:
             "--folio-endpoint",
             help="Service url of the folio instance. "
             f"Can also be specified as {_FOLIO__ENDPOINT} environment variable.",
-            type=partial(urlparse, scheme="https"),
+            type=_url_param,
         )
         folio_parser.add_argument(
             "-t",
@@ -188,22 +190,9 @@ class _ParsedArgs:
             type=int,
         )
         folio_parser.add_argument(
-            "--max-concurrency",
-            help="Maximum number of requests to be sending to FOLIO at a time. "
-            f"Can also be specified as {_BATCH__MAXCONCURRENCY} environment variable.",
-            type=int,
-        )
-        folio_parser.add_argument(
             "--retry-count",
             help="Maximum number times a failed request can be retried. "
             f"Can also be specified as {_BATCH__RETRYCOUNT} environment variable.",
-            type=int,
-        )
-        folio_parser.add_argument(
-            "--failed-user-threshold",
-            help="Percentage of users that failed to create/update triggering a retry. "
-            f"Can also be specified as {_BATCH__FAILEDUSERTHRESHOLD} "
-            "environment variable.",
             type=int,
         )
 
@@ -274,16 +263,14 @@ class _ParsedArgs:
 def main(args: list[str] | None = None) -> None:
     """Marshalls inputs and executes commands for fuiman."""
     parsed_args = _ParsedArgs(
-        folio_endpoint=urlparse(os.environ[_FOLIO__ENDPOINT], scheme="https://")
+        folio_endpoint=_url_param(os.environ[_FOLIO__ENDPOINT])
         if _FOLIO__ENDPOINT in os.environ
         else None,
         folio_tenant=os.environ.get(_FOLIO__TENANT),
         folio_username=os.environ.get(_FOLIO__USERNAME),
         folio_password=os.environ.get(_FOLIO__PASSWORD),
         batch_size=int(os.environ.get(_BATCH__BATCHSIZE, "1000")),
-        max_concurrency=int(os.environ.get(_BATCH__MAXCONCURRENCY, "6")),
         retry_count=int(os.environ.get(_BATCH__RETRYCOUNT, "1")),
-        failed_user_threshold=int(os.environ.get(_BATCH__FAILEDUSERTHRESHOLD, "0")),
         default_deactivate_missing_users=os.environ.get(
             _MODUSERIMPORT__DEACTIVATEMISSINGUSERS,
             "0",
@@ -324,7 +311,7 @@ def main(args: list[str] | None = None) -> None:
         except ValueError:
             parser.print_usage()
             raise
-        user_import.run(i_opts)
+        user_import.run(i_opts).write_results(sys.stdout)
 
 
 if __name__ == "__main__":

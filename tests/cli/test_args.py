@@ -43,7 +43,7 @@ class CliArgCases:
             {},
             "pass",
             expected_options=CheckOptions(
-                "folio.org",
+                "http://folio.org",
                 "tenant",
                 "user",
                 "pass",
@@ -62,7 +62,7 @@ class CliArgCases:
             },
             "",
             expected_options=CheckOptions(
-                "folio.org",
+                "http://folio.org",
                 "tenant",
                 "user",
                 "pass",
@@ -105,7 +105,7 @@ class CliArgCases:
             },
             "",
             expected_options=CheckOptions(
-                "folio.org",
+                "http://folio.org",
                 "tenant",
                 "another_user",
                 "pass",
@@ -122,24 +122,35 @@ class CliArgCases:
                 "FUIMAN__FOLIO__USERNAME": "user",
                 "FUIMAN__FOLIO__PASSWORD": "pass",
                 "FUIMAN__BATCHSETTINGS__BATCHSIZE": "1",
-                "FUIMAN__BATCHSETTINGS__FAILEDUSERTHRESHOLD": "30",
                 "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS": "1",
                 "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS": "1",
             },
             "",
             expected_options=ImportOptions(
-                "folio.org",
+                "http://folio.org",
                 "tenant",
                 "user",
                 "pass",
                 _decoy_csv,
                 2,
-                6,
                 1,
-                0.3,
                 True,  # noqa: FBT003
                 False,  # noqa: FBT003
                 None,
+            ),
+        )
+
+    def case_default_scheme(self) -> CliArgCase:
+        return CliArgCase(
+            "-e folio.org -t tenant -u user -p check decoy.csv",
+            {},
+            "pass",
+            expected_options=CheckOptions(
+                "https://folio.org",
+                "tenant",
+                "user",
+                "pass",
+                _decoy_csv,
             ),
         )
 

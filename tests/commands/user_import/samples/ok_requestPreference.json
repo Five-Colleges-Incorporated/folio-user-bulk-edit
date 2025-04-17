@@ -1,0 +1,27 @@
+{
+	"users": [
+		{
+			"username": "user1",
+			"externalSystemId": "user1@external.com",
+			"requestPreference": {
+				"holdShelf": true,
+				"delivery": false,
+				"id": "b4560d73-7d7a-4b86-a505-03c7f28b6bc8",
+				"fulfillment": "Hold Shelf"
+			}
+		},
+		{
+			"username": "user2",
+			"externalSystemId": "user2@external.com",
+			"requestPreference": {
+				"holdShelf": true,
+				"delivery": true,
+				"defaultServicePointId": "b4560d73-7d7a-4b86-a505-03c7f28b6bc8",
+				"fulfillment": "Delivery"
+			}
+		}
+	],
+	"totalRecords": 2,
+	"deactivateMissingUsers": false,
+	"updateOnlyPresentFields": true
+}
