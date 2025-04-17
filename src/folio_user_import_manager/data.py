@@ -27,13 +27,13 @@ class InputData:
     def batch(
         self,
         batch_size: int,
-    ) -> Iterator[tuple[int, pl.LazyFrame]]:
+    ) -> Iterator[tuple[str, int, pl.LazyFrame]]:
         """Streams input data in batches up to batch_size."""
-        for p in (
+        for f, p in (
             {"data": self._options.data_location}
             if isinstance(self._options.data_location, Path)
             else self._options.data_location
-        ).values():
+        ).items():
             data = pl.scan_csv(
                 p,
                 comment_prefix="#",
@@ -53,7 +53,7 @@ class InputData:
 
                 batch_num += 1
                 rows_batched = int(batch.select(pl.len()).collect().item())
-                yield (rows_batched, batch.drop("index"))
+                yield (f, rows_batched, batch.drop("index"))
 
     def test(
         self,
