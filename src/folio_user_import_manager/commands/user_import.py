@@ -42,6 +42,8 @@ class ImportResults:
         stream.writelines("\n".join(report) + "\n")
 
 
+# https://github.com/pola-rs/polars/issues/12795
+# Polars doesn't want to add this support for now so we're doing it manually
 def _clean_nones(obj: dict[str, typing.Any]) -> dict[str, typing.Any]:
     for k in list(obj.keys()):
         if k in ["customFields", "requestPreference"]:
