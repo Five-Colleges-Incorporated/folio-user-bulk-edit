@@ -16,7 +16,12 @@ class BehaviorCase:
 
     @contextmanager
     def setup(self) -> typing.Any:
-        pl.DataFrame({"row": list(range(100))}).write_csv(self.data_location)
+        pl.DataFrame(
+            {
+                "username": ["u"] * 100,
+                "externalSystemId": ["e"] * 100,
+            },
+        ).write_csv(self.data_location)
         yield
 
 

@@ -24,22 +24,27 @@ class InputData:
         """Initializes a new instance of InputData."""
         self._options = options
 
+    @classmethod
+    def _scan_csv(cls, path: Path, ignore_errors: bool = False) -> pl.LazyFrame:
+        return pl.scan_csv(
+            path,
+            comment_prefix="#",
+            ignore_errors=ignore_errors,
+            try_parse_dates=True,
+            schema_overrides={"barcode": pl.Utf8},
+        )
+
     def batch(
         self,
         batch_size: int,
-    ) -> Iterator[tuple[int, pl.LazyFrame]]:
+    ) -> Iterator[tuple[str, int, pl.LazyFrame]]:
         """Streams input data in batches up to batch_size."""
-        for p in (
+        for f, p in (
             {"data": self._options.data_location}
             if isinstance(self._options.data_location, Path)
             else self._options.data_location
-        ).values():
-            data = pl.scan_csv(
-                p,
-                comment_prefix="#",
-                ignore_errors=False,
-                try_parse_dates=True,
-            ).with_row_index()
+        ).items():
+            data = self._scan_csv(p).with_row_index()
 
             batch_num = 0
             rows_batched = batch_size
@@ -53,7 +58,7 @@ class InputData:
 
                 batch_num += 1
                 rows_batched = int(batch.select(pl.len()).collect().item())
-                yield (rows_batched, batch.drop("index"))
+                yield (f, rows_batched, batch.drop("index"))
 
     def test(
         self,
@@ -71,18 +76,13 @@ class InputData:
             else self._options.data_location
         ).items():
             try:
-                pl.read_csv(p, comment_prefix="#", try_parse_dates=True)
+                self._scan_csv(p).collect()
             except pl.exceptions.PolarsError as e:
                 read_errors[n] = e
 
             data: pl.DataFrame | None
             try:
-                data = pl.read_csv(
-                    p,
-                    comment_prefix="#",
-                    ignore_errors=True,
-                    try_parse_dates=True,
-                )
+                data = self._scan_csv(p, ignore_errors=True).collect()
             except pl.exceptions.PolarsError as e:
                 if n not in read_errors:
                     read_errors[n] = e

@@ -1,17 +1,16 @@
 import logging
-from datetime import datetime
 from logging.config import dictConfig
 from pathlib import Path
 
 
 def initialize(
     log_directory: Path,
+    now: str,
     console_level: int = logging.WARNING,
     verbose_file_level: int = logging.INFO,
 ) -> None:
     log_directory.mkdir(exist_ok=True, parents=True)
 
-    now = datetime.now(tz=None).strftime("%y%m%d%H%M%S")  # noqa: DTZ005
     (log_directory / f"{now}-verbose.log.tsv").write_text(
         "asctime\tlevelname\tprocess\tthread\ttaskName\tmodule\tfilename\tlineno\tmessage\n",
     )

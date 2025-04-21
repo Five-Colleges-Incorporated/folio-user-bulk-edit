@@ -134,8 +134,8 @@ class CliArgCases:
                 _decoy_csv,
                 2,
                 1,
-                True,  # noqa: FBT003
-                False,  # noqa: FBT003
+                True,
+                False,
                 None,
             ),
         )
