@@ -36,10 +36,10 @@ class CliPathCase:
         with mock.patch.dict(
             "os.environ",
             {
-                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
-                "FUIMAN__FOLIO__TENANT": "tenant",
-                "FUIMAN__FOLIO__USERNAME": "user",
-                "FUIMAN__FOLIO__PASSWORD": "pass",
+                "UBE__FOLIO__ENDPOINT": "http://folio.org",
+                "UBE__FOLIO__TENANT": "tenant",
+                "UBE__FOLIO__USERNAME": "user",
+                "UBE__FOLIO__PASSWORD": "pass",
             },
             clear=True,
         ):
@@ -128,13 +128,13 @@ class CliPathCases:
         )
 
 
-@mock.patch("folio_user_import_manager.commands.check.run")
+@mock.patch("folio_user_bulk_edit.commands.check.run")
 @parametrize_with_cases("tc", cases=CliPathCases)
 def test_cli_args(
     check_run_mock: mock.Mock,
     tc: CliPathCase,
 ) -> None:
-    import folio_user_import_manager.cli as uut
+    import folio_user_bulk_edit.cli as uut
 
     with tc.setup():
         if tc.expected_exception is None:

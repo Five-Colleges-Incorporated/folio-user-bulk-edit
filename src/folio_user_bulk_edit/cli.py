@@ -10,20 +10,20 @@ from functools import lru_cache
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse, urlunparse
 
-from folio_user_import_manager import _cli_log
-from folio_user_import_manager.commands import check, user_import
+from folio_user_bulk_edit import _cli_log
+from folio_user_bulk_edit.commands import check, user_import
 
-_FOLIO__ENDPOINT = "FUIMAN__FOLIO__ENDPOINT"
-_FOLIO__TENANT = "FUIMAN__FOLIO__TENANT"
-_FOLIO__USERNAME = "FUIMAN__FOLIO__USERNAME"
-_FOLIO__PASSWORD = "FUIMAN__FOLIO__PASSWORD"  # noqa:S105
+_FOLIO__ENDPOINT = "UBE__FOLIO__ENDPOINT"
+_FOLIO__TENANT = "UBE__FOLIO__TENANT"
+_FOLIO__USERNAME = "UBE__FOLIO__USERNAME"
+_FOLIO__PASSWORD = "UBE__FOLIO__PASSWORD"  # noqa:S105
 
-_BATCH__BATCHSIZE = "FUIMAN__BATCHSETTINGS__BATCHSIZE"
-_BATCH__RETRYCOUNT = "FUIMAN__BATCHSETTINGS__RETRYCOUNT"
+_BATCH__BATCHSIZE = "UBE__BATCHSETTINGS__BATCHSIZE"
+_BATCH__RETRYCOUNT = "UBE__BATCHSETTINGS__RETRYCOUNT"
 
-_MODUSERIMPORT__DEACTIVATEMISSINGUSERS = "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS"
-_MODUSERIMPORT__UPDATEALLFIELDS = "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS"
-_MODUSERIMPORT__SOURCETYPE = "FUIMAN__MODUSERIMPORT__SOURCETYPE"
+_MODUSERIMPORT__DEACTIVATEMISSINGUSERS = "UBE__MODUSERIMPORT__DEACTIVATEMISSINGUSERS"
+_MODUSERIMPORT__UPDATEALLFIELDS = "UBE__MODUSERIMPORT__UPDATEALLFIELDS"
+_MODUSERIMPORT__SOURCETYPE = "UBE__MODUSERIMPORT__SOURCETYPE"
 
 
 def _url_param(param: str) -> ParseResult:
@@ -146,8 +146,8 @@ class _ParsedArgs:
     @staticmethod
     @lru_cache
     def parser() -> argparse.ArgumentParser:
-        desc = "Initiates, monitors, and reports on mod-user-import operations in FOLIO"
-        parser = argparse.ArgumentParser(prog="fuiman", description=desc)
+        desc = "Initiates, monitors, and reports on bulk user operations in FOLIO."
+        parser = argparse.ArgumentParser(prog="ube", description=desc)
 
         parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
         parser.add_argument("-v", "--verbose", action="count")
@@ -157,21 +157,21 @@ class _ParsedArgs:
         folio_parser.add_argument(
             "-e",
             "--folio-endpoint",
-            help="Service url of the folio instance. "
+            help="Service url of the FOLIO instance. "
             f"Can also be specified as {_FOLIO__ENDPOINT} environment variable.",
             type=_url_param,
         )
         folio_parser.add_argument(
             "-t",
             "--folio-tenant",
-            help="Tenant of the folio instance. "
+            help="Tenant of the FOLIO instance. "
             f"Can also be specified as {_FOLIO__TENANT} environment variable.",
             type=str,
         )
         folio_parser.add_argument(
             "-u",
             "--folio-username",
-            help="Username of the folio instance service user. "
+            help="Username of the FOLIO instance service user. "
             f"Can also be specified as {_FOLIO__USERNAME} environment variable.",
             type=str,
         )
@@ -179,7 +179,7 @@ class _ParsedArgs:
             "-p",
             "--ask-folio-password",
             action="store_true",
-            help="Whether to ask for the password of the folio instance service user. "
+            help="Whether to ask for the password of the FOLIO instance service user. "
             f"Can also be specified as {_FOLIO__PASSWORD} environment variable.",
         )
 

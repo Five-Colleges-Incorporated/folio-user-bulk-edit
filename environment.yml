@@ -1,5 +1,5 @@
 ---
-name: folio-user-import-manager
+name: folio-user-bulk-edit
 channels:
   - conda-forge
   - nodefaults

@@ -8,8 +8,8 @@ from unittest import mock
 import pytest
 from pytest_cases import parametrize_with_cases
 
-from folio_user_import_manager.commands.check import CheckOptions
-from folio_user_import_manager.commands.user_import import ImportOptions
+from folio_user_bulk_edit.commands.check import CheckOptions
+from folio_user_bulk_edit.commands.user_import import ImportOptions
 
 
 @dataclass
@@ -55,10 +55,10 @@ class CliArgCases:
         return CliArgCase(
             "check decoy.csv",
             {
-                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
-                "FUIMAN__FOLIO__TENANT": "tenant",
-                "FUIMAN__FOLIO__USERNAME": "user",
-                "FUIMAN__FOLIO__PASSWORD": "pass",
+                "UBE__FOLIO__ENDPOINT": "http://folio.org",
+                "UBE__FOLIO__TENANT": "tenant",
+                "UBE__FOLIO__USERNAME": "user",
+                "UBE__FOLIO__PASSWORD": "pass",
             },
             "",
             expected_options=CheckOptions(
@@ -98,10 +98,10 @@ class CliArgCases:
         return CliArgCase(
             "-u another_user check decoy.csv",
             {
-                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
-                "FUIMAN__FOLIO__TENANT": "tenant",
-                "FUIMAN__FOLIO__USERNAME": "user",
-                "FUIMAN__FOLIO__PASSWORD": "pass",
+                "UBE__FOLIO__ENDPOINT": "http://folio.org",
+                "UBE__FOLIO__TENANT": "tenant",
+                "UBE__FOLIO__USERNAME": "user",
+                "UBE__FOLIO__PASSWORD": "pass",
             },
             "",
             expected_options=CheckOptions(
@@ -117,13 +117,13 @@ class CliArgCases:
         return CliArgCase(
             "--batch-size 2 import --no-update-all-fields decoy.csv",
             {
-                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
-                "FUIMAN__FOLIO__TENANT": "tenant",
-                "FUIMAN__FOLIO__USERNAME": "user",
-                "FUIMAN__FOLIO__PASSWORD": "pass",
-                "FUIMAN__BATCHSETTINGS__BATCHSIZE": "1",
-                "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS": "1",
-                "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS": "1",
+                "UBE__FOLIO__ENDPOINT": "http://folio.org",
+                "UBE__FOLIO__TENANT": "tenant",
+                "UBE__FOLIO__USERNAME": "user",
+                "UBE__FOLIO__PASSWORD": "pass",
+                "UBE__BATCHSETTINGS__BATCHSIZE": "1",
+                "UBE__MODUSERIMPORT__DEACTIVATEMISSINGUSERS": "1",
+                "UBE__MODUSERIMPORT__UPDATEALLFIELDS": "1",
             },
             "",
             expected_options=ImportOptions(
@@ -155,15 +155,15 @@ class CliArgCases:
         )
 
 
-@mock.patch("folio_user_import_manager.commands.user_import.run")
-@mock.patch("folio_user_import_manager.commands.check.run")
+@mock.patch("folio_user_bulk_edit.commands.user_import.run")
+@mock.patch("folio_user_bulk_edit.commands.check.run")
 @parametrize_with_cases("tc", cases=CliArgCases)
 def test_cli_args(
     check_mock: mock.Mock,
     import_mock: mock.Mock,
     tc: CliArgCase,
 ) -> None:
-    import folio_user_import_manager.cli as uut
+    import folio_user_bulk_edit.cli as uut
 
     with tc.setup():
         if tc.expected_exception is None:

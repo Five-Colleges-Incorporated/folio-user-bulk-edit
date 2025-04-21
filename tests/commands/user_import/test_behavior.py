@@ -89,7 +89,7 @@ class RetryCases:
 @mock.patch("pyfolioclient.FolioBaseClient")
 @parametrize_with_cases("tc", RetryCases)
 def test_retry(base_client_mock: mock.Mock, tc: RetryCase) -> None:
-    import folio_user_import_manager.commands.user_import as uut
+    import folio_user_bulk_edit.commands.user_import as uut
 
     # I couldn't figure this out better
     post_data_mock: mock.MagicMock = (
@@ -125,7 +125,7 @@ def test_retry(base_client_mock: mock.Mock, tc: RetryCase) -> None:
 
 @mock.patch("pyfolioclient.FolioBaseClient")
 def test_batch(base_client_mock: mock.Mock, tmpdir: str) -> None:
-    import folio_user_import_manager.commands.user_import as uut
+    import folio_user_bulk_edit.commands.user_import as uut
 
     tc = BehaviorCase(Path(tmpdir) / "data.csv")
 

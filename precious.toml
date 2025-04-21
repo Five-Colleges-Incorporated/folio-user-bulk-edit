@@ -47,5 +47,5 @@ type = "lint"
 include = ["*.py"]
 invoke = "once"
 path_args = "none"
-cmd = ["mypy", "src/folio_user_import_manager/", "tests/"]
+cmd = ["mypy", "src/folio_user_bulk_edit/", "tests/"]
 ok_exit_codes = [0]

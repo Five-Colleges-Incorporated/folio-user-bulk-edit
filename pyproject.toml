@@ -1,8 +1,8 @@
 [project]
-name = "folio-user-import-manager"
+name = "folio-user-bulk-edit"
 # Make sure to also update the cli
 version = "0.1.0"
-description = "Initiates, monitors, and reports on mod-user-import operations in FOLIO."
+description = "Initiates, monitors, and reports on bulk user operations in FOLIO."
 authors = [
     {name = "Katherine Bargar", email = "kbargar@fivecolleges.edu"},
 ]
@@ -12,7 +12,7 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 
 [project.scripts]
-fuiman = "folio_user_import_manager.cli:main"
+ube = "folio_user_bulk_edit.cli:main"
 
 [build-system]
 requires = ["pdm-backend"]
