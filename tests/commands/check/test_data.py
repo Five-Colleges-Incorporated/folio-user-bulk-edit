@@ -39,7 +39,7 @@ def test_check_data(
     read_expected: bool,
     schema_expected: _SchemaErrors | None,
 ) -> None:
-    import folio_user_import_manager.commands.check as uut
+    import folio_user_bulk_edit.commands.check as uut
 
     res = uut.run(
         uut.CheckOptions("", "", "", "", path),

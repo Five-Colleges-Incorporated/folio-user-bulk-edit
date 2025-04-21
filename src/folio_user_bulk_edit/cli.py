@@ -10,8 +10,8 @@ from functools import lru_cache
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse, urlunparse
 
-from folio_user_import_manager import _cli_log
-from folio_user_import_manager.commands import check, user_import
+from folio_user_bulk_edit import _cli_log
+from folio_user_bulk_edit.commands import check, user_import
 
 _FOLIO__ENDPOINT = "UBE_FOLIO__ENDPOINT"
 _FOLIO__TENANT = "UBE_FOLIO__TENANT"

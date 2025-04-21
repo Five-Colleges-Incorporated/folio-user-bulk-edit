@@ -8,8 +8,8 @@ from unittest import mock
 import pytest
 from pytest_cases import parametrize_with_cases
 
-from folio_user_import_manager.commands.check import CheckOptions
-from folio_user_import_manager.commands.user_import import ImportOptions
+from folio_user_bulk_edit.commands.check import CheckOptions
+from folio_user_bulk_edit.commands.user_import import ImportOptions
 
 
 @dataclass
@@ -155,15 +155,15 @@ class CliArgCases:
         )
 
 
-@mock.patch("folio_user_import_manager.commands.user_import.run")
-@mock.patch("folio_user_import_manager.commands.check.run")
+@mock.patch("folio_user_bulk_edit.commands.user_import.run")
+@mock.patch("folio_user_bulk_edit.commands.check.run")
 @parametrize_with_cases("tc", cases=CliArgCases)
 def test_cli_args(
     check_mock: mock.Mock,
     import_mock: mock.Mock,
     tc: CliArgCase,
 ) -> None:
-    import folio_user_import_manager.cli as uut
+    import folio_user_bulk_edit.cli as uut
 
     with tc.setup():
         if tc.expected_exception is None:

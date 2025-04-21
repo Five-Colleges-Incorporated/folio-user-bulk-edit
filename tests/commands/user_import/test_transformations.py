@@ -30,7 +30,7 @@ def test_transform_data(
     base_client_mock: mock.Mock,
     tc: TransformationTestCase,
 ) -> None:
-    import folio_user_import_manager.commands.user_import as uut
+    import folio_user_bulk_edit.commands.user_import as uut
 
     # I couldn't figure this out better
     post_data_mock: mock.MagicMock = (

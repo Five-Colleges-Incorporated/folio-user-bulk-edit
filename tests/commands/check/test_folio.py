@@ -70,7 +70,7 @@ class FolioErrorCases:
 
 @parametrize(folio_url=(_okapi, _eureka))
 def test_check_folio_ok(folio_url: str) -> None:
-    import folio_user_import_manager.commands.check as uut
+    import folio_user_bulk_edit.commands.check as uut
 
     res = uut.run(
         uut.CheckOptions(
@@ -95,7 +95,7 @@ def test_check_folio_error(
     folio_password: str,
     expected_error: str,
 ) -> None:
-    import folio_user_import_manager.commands.check as uut
+    import folio_user_bulk_edit.commands.check as uut
 
     res = uut.run(
         uut.CheckOptions(

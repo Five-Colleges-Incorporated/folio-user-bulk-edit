@@ -128,13 +128,13 @@ class CliPathCases:
         )
 
 
-@mock.patch("folio_user_import_manager.commands.check.run")
+@mock.patch("folio_user_bulk_edit.commands.check.run")
 @parametrize_with_cases("tc", cases=CliPathCases)
 def test_cli_args(
     check_run_mock: mock.Mock,
     tc: CliPathCase,
 ) -> None:
-    import folio_user_import_manager.cli as uut
+    import folio_user_bulk_edit.cli as uut
 
     with tc.setup():
         if tc.expected_exception is None:

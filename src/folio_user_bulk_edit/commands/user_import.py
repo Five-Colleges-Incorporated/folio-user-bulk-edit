@@ -8,8 +8,8 @@ import polars as pl
 import polars.selectors as cs
 from pyfolioclient import BadRequestError, UnprocessableContentError
 
-from folio_user_import_manager.data import InputData, InputDataOptions
-from folio_user_import_manager.folio import Folio, FolioOptions
+from folio_user_bulk_edit.data import InputData, InputDataOptions
+from folio_user_bulk_edit.folio import Folio, FolioOptions
 
 
 @dataclass(frozen=True)
