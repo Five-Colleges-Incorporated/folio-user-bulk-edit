@@ -1,0 +1,26 @@
+{
+	"users": [
+		{
+			"username": "user1",
+			"externalSystemId": "user1@external.com",
+			"personal": {
+				"lastName": "last",
+				"addresses": [
+					{
+						"id": "9fa156da-2c19-4b46-bd0a-ccdf98b21edd"
+					}
+				]
+			}
+		},
+		{
+			"username": "user2",
+			"externalSystemId": "user2@external.com",
+			"personal": {
+				"lastName": "name"
+			}
+		}
+	],
+	"totalRecords": 2,
+	"deactivateMissingUsers": false,
+	"updateOnlyPresentFields": true
+}

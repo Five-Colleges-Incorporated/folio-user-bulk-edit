@@ -90,6 +90,7 @@ def _transform_batch(batch: pl.LazyFrame) -> pl.LazyFrame:
     cs_addresses = cs.starts_with("personal_address_")
     cs_personal = cs.starts_with("personal_") - cs_addresses
     cs_req_pref = cs.starts_with("requestPreference_")
+    cs_indiv_addresses = []
 
     primary_names = [
         c.replace("personal_address_primary_", "")
@@ -97,6 +98,7 @@ def _transform_batch(batch: pl.LazyFrame) -> pl.LazyFrame:
         if c.startswith("personal_address_primary_")
     ]
     if any(primary_names):
+        cs_indiv_addresses.append(cs.by_name("personal_address_primary"))
         batch = batch.with_columns(
             pl.struct(cs_primary)
             .struct.rename_fields(primary_names)
@@ -108,6 +110,7 @@ def _transform_batch(batch: pl.LazyFrame) -> pl.LazyFrame:
         if c.startswith("personal_address_secondary_")
     ]
     if any(secondary_names):
+        cs_indiv_addresses.append(cs.by_name("personal_address_secondary"))
         batch = batch.with_columns(
             pl.struct(cs_secondary)
             .struct.rename_fields(secondary_names)
@@ -119,12 +122,9 @@ def _transform_batch(batch: pl.LazyFrame) -> pl.LazyFrame:
         for c in cols
         if c.startswith("personal_") and not c.startswith("personal_address_")
     ]
-    if any(primary_names + secondary_names):
+    if len(cs_indiv_addresses) > 0:
         batch = batch.with_columns(
-            pl.concat_list(
-                cs.by_name("personal_address_primary"),
-                cs.by_name("personal_address_secondary"),
-            ).alias("personal_addresses"),
+            pl.concat_list(*cs_indiv_addresses).alias("personal_addresses"),
         )
         cs_personal = cs_personal | cs.by_name("personal_addresses")
         personal_names.append("addresses")
