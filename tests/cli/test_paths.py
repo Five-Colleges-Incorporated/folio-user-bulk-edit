@@ -36,10 +36,10 @@ class CliPathCase:
         with mock.patch.dict(
             "os.environ",
             {
-                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
-                "FUIMAN__FOLIO__TENANT": "tenant",
-                "FUIMAN__FOLIO__USERNAME": "user",
-                "FUIMAN__FOLIO__PASSWORD": "pass",
+                "UBE_FOLIO__ENDPOINT": "http://folio.org",
+                "UBE_FOLIO__TENANT": "tenant",
+                "UBE_FOLIO__USERNAME": "user",
+                "UBE_FOLIO__PASSWORD": "pass",
             },
             clear=True,
         ):

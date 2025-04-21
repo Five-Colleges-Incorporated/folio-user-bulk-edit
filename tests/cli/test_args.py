@@ -55,10 +55,10 @@ class CliArgCases:
         return CliArgCase(
             "check decoy.csv",
             {
-                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
-                "FUIMAN__FOLIO__TENANT": "tenant",
-                "FUIMAN__FOLIO__USERNAME": "user",
-                "FUIMAN__FOLIO__PASSWORD": "pass",
+                "UBE_FOLIO__ENDPOINT": "http://folio.org",
+                "UBE_FOLIO__TENANT": "tenant",
+                "UBE_FOLIO__USERNAME": "user",
+                "UBE_FOLIO__PASSWORD": "pass",
             },
             "",
             expected_options=CheckOptions(
@@ -98,10 +98,10 @@ class CliArgCases:
         return CliArgCase(
             "-u another_user check decoy.csv",
             {
-                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
-                "FUIMAN__FOLIO__TENANT": "tenant",
-                "FUIMAN__FOLIO__USERNAME": "user",
-                "FUIMAN__FOLIO__PASSWORD": "pass",
+                "UBE_FOLIO__ENDPOINT": "http://folio.org",
+                "UBE_FOLIO__TENANT": "tenant",
+                "UBE_FOLIO__USERNAME": "user",
+                "UBE_FOLIO__PASSWORD": "pass",
             },
             "",
             expected_options=CheckOptions(
@@ -117,13 +117,13 @@ class CliArgCases:
         return CliArgCase(
             "--batch-size 2 import --no-update-all-fields decoy.csv",
             {
-                "FUIMAN__FOLIO__ENDPOINT": "http://folio.org",
-                "FUIMAN__FOLIO__TENANT": "tenant",
-                "FUIMAN__FOLIO__USERNAME": "user",
-                "FUIMAN__FOLIO__PASSWORD": "pass",
-                "FUIMAN__BATCHSETTINGS__BATCHSIZE": "1",
-                "FUIMAN__MODUSERIMPORT__DEACTIVATEMISSINGUSERS": "1",
-                "FUIMAN__MODUSERIMPORT__UPDATEALLFIELDS": "1",
+                "UBE_FOLIO__ENDPOINT": "http://folio.org",
+                "UBE_FOLIO__TENANT": "tenant",
+                "UBE_FOLIO__USERNAME": "user",
+                "UBE_FOLIO__PASSWORD": "pass",
+                "UBE_BATCHSETTINGS__BATCHSIZE": "1",
+                "UBE_MODUSERIMPORT__DEACTIVATEMISSINGUSERS": "1",
+                "UBE_MODUSERIMPORT__UPDATEALLFIELDS": "1",
             },
             "",
             expected_options=ImportOptions(
