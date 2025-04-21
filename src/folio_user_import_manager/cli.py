@@ -146,8 +146,8 @@ class _ParsedArgs:
     @staticmethod
     @lru_cache
     def parser() -> argparse.ArgumentParser:
-        desc = "Initiates, monitors, and reports on mod-user-import operations in FOLIO"
-        parser = argparse.ArgumentParser(prog="fuiman", description=desc)
+        desc = "Initiates, monitors, and reports on bulk user operations in FOLIO."
+        parser = argparse.ArgumentParser(prog="ube", description=desc)
 
         parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
         parser.add_argument("-v", "--verbose", action="count")
@@ -157,21 +157,21 @@ class _ParsedArgs:
         folio_parser.add_argument(
             "-e",
             "--folio-endpoint",
-            help="Service url of the folio instance. "
+            help="Service url of the FOLIO instance. "
             f"Can also be specified as {_FOLIO__ENDPOINT} environment variable.",
             type=_url_param,
         )
         folio_parser.add_argument(
             "-t",
             "--folio-tenant",
-            help="Tenant of the folio instance. "
+            help="Tenant of the FOLIO instance. "
             f"Can also be specified as {_FOLIO__TENANT} environment variable.",
             type=str,
         )
         folio_parser.add_argument(
             "-u",
             "--folio-username",
-            help="Username of the folio instance service user. "
+            help="Username of the FOLIO instance service user. "
             f"Can also be specified as {_FOLIO__USERNAME} environment variable.",
             type=str,
         )
@@ -179,7 +179,7 @@ class _ParsedArgs:
             "-p",
             "--ask-folio-password",
             action="store_true",
-            help="Whether to ask for the password of the folio instance service user. "
+            help="Whether to ask for the password of the FOLIO instance service user. "
             f"Can also be specified as {_FOLIO__PASSWORD} environment variable.",
         )
 
