@@ -36,7 +36,7 @@ class DataErrorCases:
 @parametrize_with_cases("path,read_expected,schema_expected", DataErrorCases)
 def test_check_data(
     path: Path,
-    read_expected: bool,  # noqa: FBT001
+    read_expected: bool,
     schema_expected: _SchemaErrors | None,
 ) -> None:
     import folio_user_import_manager.commands.check as uut
