@@ -62,7 +62,7 @@ If you are programatically calling ube you can use it as a python library by doi
 
 ```python
 from pathlib import Path
-from folio_bulk_user_import.commands import check, user_import
+from folio_bulk_user_edit.commands import check, user_import
 
 check_results = check.run(check.CheckOptions(
     folio_url="...",
@@ -91,4 +91,4 @@ Especially the schemas.
 
 ## Contributing
 
-See (CONTRIBUTING)[./CONTRIBUTING.md].
+See [CONTRIBUTING](./CONTRIBUTING.md).
