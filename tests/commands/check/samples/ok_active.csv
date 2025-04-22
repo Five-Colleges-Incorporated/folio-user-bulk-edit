@@ -1,0 +1,3 @@
+username,externalSystemId,active,expirationDate
+user1,user1@external.com,false,2023-08-04
+user2,user2@external.com,true,2099-08-04
