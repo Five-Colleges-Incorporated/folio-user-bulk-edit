@@ -1,6 +1,7 @@
 """Panderas Schemas for FOLIO user data."""
 
 import json
+from datetime import UTC, datetime
 from urllib.parse import urlparse
 
 import pandera.polars as pla
@@ -86,6 +87,21 @@ class _BaseUserImportSchema(pla.DataFrameModel):
             len(unique_vals) == len(all_vals)
             and len(unique_vals - {"Support", "Programs", "Services"}) == 0
         )
+
+    @pla.dataframe_check
+    @classmethod
+    def active_expired(cls, data: pla.PolarsData) -> pl.LazyFrame:
+        now = datetime.now(tz=UTC).date()
+        cols = set(data.lazyframe.collect_schema().names())
+        if len({"active", "expirationDate"} - cols) == 0:
+            return data.lazyframe.select(
+                pl.Expr.or_(
+                    pl.col("active").not_(),
+                    pl.col("expirationDate").is_null(),
+                    pl.col("expirationDate").gt(pl.lit(now)),
+                ),
+            )
+        return data.lazyframe.select(pl.lit(True))
 
 
 class _RequestPreferencesSchema(pla.DataFrameModel):
