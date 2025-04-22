@@ -19,7 +19,7 @@ pipx install folio-user-bulk-edit
 
 ### As a cli tool
 
-The binary to run the tool is `ube`.
+The executable to run the tool is `ube`.
 If you installed using pip or pipx it should be on your path and executable.
 
 You can also run the cli without installing using pipx:
