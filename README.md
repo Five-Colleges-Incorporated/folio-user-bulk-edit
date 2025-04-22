@@ -5,7 +5,7 @@ Not to be confused with the very limited [user capabilities of bulk edit](https:
 
 ## Installation
 
-User Bulk Edit is available in PyPi. It can be installed using:
+User Bulk Edit is [available on PyPi](https://pypi.org/project/folio-user-bulk-edit/). It can be installed using:
 ```sh
 pip install folio-user-bulk-edit
 ```
