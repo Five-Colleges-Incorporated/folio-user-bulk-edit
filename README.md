@@ -15,6 +15,8 @@ Additionally if you wish to only use the cli you can install it using pipx:
 pipx install folio-user-bulk-edit
 ```
 
+Check out the [CHANGELOG](./CHANGELOG.md) for what's new!
+
 ## Usage
 
 ### As a cli tool
