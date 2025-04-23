@@ -149,7 +149,9 @@ class _ParsedArgs:
         desc = "Initiates, monitors, and reports on bulk user operations in FOLIO."
         parser = argparse.ArgumentParser(prog="ube", description=desc)
 
-        parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+        # Make sure to also update the project
+        parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
+
         parser.add_argument("-v", "--verbose", action="count")
         parser.add_argument("--log-directory", type=Path)
 
